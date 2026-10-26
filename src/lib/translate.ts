@@ -25,6 +25,31 @@ export function translateCourse(course: Course, en: Record<string, string>): { c
     return v === null ? s : parseInline(v);
   };
   const str = (s: string, required = true): string => lookup(s, required) ?? s;
+  const prompt = (text: string): string => {
+    let translated = lookup(text, false) ?? text;
+    const prefixes: [RegExp, string][] = [
+      [/^Schreib die Zahl:\s*/, "Write the number: "],
+      [/^Schreib die Frage:\s*/, "Write the question: "],
+      [/^Schreib mit (.+?):\s*/, "Rewrite using $1: "],
+      [/^Schreib Artikel und Plural:\s*/, "Write the article and plural: "],
+      [/^Ordne zu:\s*/, "Match: "],
+      [/^Ordne:\s*/, "Put in order: "],
+      [/^Ergänze frei:\s*/, "Complete freely: "],
+      [/^Gegenteil:\s*/, "Opposite: "],
+      [/^Höflich:\s*/, "Politely: "],
+      [/^Antwort:\s*/, "Answer: "],
+      [/^Imperativ\s*/, "Imperative "],
+    ];
+    for (const [pattern, replacement] of prefixes) translated = translated.replace(pattern, replacement);
+    translated = translated
+      .replace(/→ Frage:/g, "→ Question:")
+      .replace(/\(Frage nach Zeit\)/g, "(ask about the time)")
+      .replace(/\(Dativ!\)/g, "(dative!)")
+      .replace(/sehr höflich/g, "very politely")
+      .replace(/Präteritum/g, "simple past");
+    if (/^(?:Schreib|Ordne|Ergänze|Bilde|Benutze|Gegenteil|Höflich|Antwort)\b/.test(translated)) missing.add(`exercise instruction\t${text}`);
+    return translated;
+  };
   const blocks = (list: Block[]): Block[] =>
     list.map((b) => {
       switch (b.kind) {
@@ -53,7 +78,7 @@ export function translateCourse(course: Course, en: Record<string, string>): { c
     intro: blocks(u.intro),
     sections: u.sections.map((s) => ({ ...s, title: str(s.title), blocks: blocks(s.blocks) })),
     items: Object.fromEntries(
-      Object.entries(u.items).map(([id, item]) => [id, item.kind === "open" ? { ...item, prompt: str(item.prompt, false) } : item]),
+      Object.entries(u.items).map(([id, item]) => [id, { ...item, prompt: prompt(item.prompt) }]),
     ),
     writing: u.writing.map((w) => ({ ...w, prompt: writingPrompt(w.prompt) })),
     notes: Object.fromEntries(Object.entries(u.notes).map(([k, v]) => [k, blocks(v)])),

@@ -27,6 +27,25 @@ test("every exercise has a usable solution", () => {
   }
 });
 
+test("free completions use self-assessment instead of exact-answer grading", () => {
+  const week = course.weeks[8];
+  assert.equal(week?.items["w9-g2-9"]?.kind, "open");
+  assert.ok(week?.items["w9-g2-9"]?.display);
+  assert.equal(week?.items["w9-g2-6"]?.kind, "text");
+});
+
+test("embedded instructions are English without translating German practice sentences", () => {
+  assert.equal(course.weeks[0]?.items["w1-quiz-2"]?.prompt, "Write the number: 47 → ___");
+  assert.ok(course.weeks[1]?.items["w2-quiz-2"]?.prompt.startsWith("Put in order:"));
+  assert.ok(course.weeks[8]?.items["w9-g2-9"]?.prompt.startsWith("Complete freely:"));
+  assert.equal(course.weeks[0]?.items["w1-g1-1"]?.prompt, "Er ___ jeden Tag mit dem Fahrrad. (fahren)");
+  for (const unit of [course.placement, ...course.weeks]) {
+    for (const item of Object.values(unit.items)) {
+      assert.doesNotMatch(item.prompt, /^(?:Schreib|Ordne|Ergänze|Bilde|Benutze|Gegenteil|Höflich|Antwort)\b/, item.id);
+    }
+  }
+});
+
 test("every auto-graded exercise accepts its own answer key", () => {
   for (const unit of [course.placement, ...course.weeks]) {
     for (const item of Object.values(unit.items) as Item[]) {

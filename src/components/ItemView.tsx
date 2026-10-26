@@ -4,7 +4,7 @@ import type { Item } from "../lib/types.ts";
 import { gradeItem, step } from "../lib/grade.ts";
 import type { Note } from "../lib/grade.ts";
 import { parseInline } from "../lib/inline.ts";
-import { acceptOverride, itemState, recordAnswer } from "../lib/progress.ts";
+import { acceptOverride, itemState, recordAnswer, MAX_ANSWER_LENGTH } from "../lib/progress.ts";
 import { CATEGORIES } from "../lib/tags.ts";
 import { InlineText } from "./Blocks.tsx";
 import { useProgress } from "../state/ProgressContext.tsx";
@@ -35,6 +35,7 @@ function Prompt({ text, blanks, values, setValue, disabled, label }: { text: str
               autoComplete="off"
               autoCapitalize="off"
               spellCheck={false}
+              maxLength={MAX_ANSWER_LENGTH}
               size={Math.max(6, (values[index] ?? "").length + 2)}
             />
           );
@@ -49,7 +50,8 @@ export function ItemView({ item }: { item: Item }) {
   const { progress, update } = useProgress();
   const id = useId();
   const state = itemState(progress, item.id);
-  const [values, setValues] = useState<string[]>([]);
+  const [draft, setDraft] = useState<string[] | null>(null);
+  const values = draft ?? progress.items[item.id]?.inputs ?? [];
   const [notes, setNotes] = useState<Note[]>([]);
   const [spelling, setSpelling] = useState(false);
   const [selfShown, setSelfShown] = useState(false);
@@ -57,14 +59,14 @@ export function ItemView({ item }: { item: Item }) {
   const label = `Exercise ${item.group} ${item.n}`;
   const cat = CATEGORIES[item.tag];
 
-  const answer = (ok: boolean) => {
+  const answer = (ok: boolean, submitted = values) => {
     const next = step(state, ok);
-    update((p) => recordAnswer(p, item.id, state, next, item.tag, Date.now()));
+    update((p) => recordAnswer(p, item.id, state, next, item.tag, Date.now(), submitted));
   };
 
   const selfCheck = (ok: boolean) => {
     const next = ok ? step(state, true) : step(step(state, false), false);
-    update((p) => recordAnswer(p, item.id, state, next, item.tag, Date.now()));
+    update((p) => recordAnswer(p, item.id, state, next, item.tag, Date.now(), values));
   };
 
   const submit = (e: FormEvent) => {
@@ -78,9 +80,9 @@ export function ItemView({ item }: { item: Item }) {
     answer(verdict.ok);
   };
 
-  const setValue = (k: number, v: string) => setValues((prev) => Object.assign([...prev], { [k]: v }));
+  const setValue = (k: number, v: string) => setDraft((prev) => Object.assign([...(prev ?? values)], { [k]: v }));
   const reset = () => {
-    setValues([]);
+    setDraft(null);
     setNotes([]);
     setSelfShown(false);
     update((p) => ({ ...p, items: Object.fromEntries(Object.entries(p.items).filter(([k]) => k !== item.id)) }));
@@ -92,7 +94,7 @@ export function ItemView({ item }: { item: Item }) {
       return (
         <div className="feedback ok">
           <strong>Correct!</strong> {extra.join(" ")}
-          {item.kind !== "choice" && notes.includes("umlaut") ? <> Answer: {item.display}</> : null}
+          {item.kind !== "choice" ? <> Model answer: <span lang="de">{item.display}</span></> : null}
         </div>
       );
     }
@@ -136,7 +138,7 @@ export function ItemView({ item }: { item: Item }) {
         </legend>
         <div className="options">
           {item.options?.map((o) => (
-            <button key={o.key} type="button" className="option" disabled={done} onClick={() => answer(o.key === item.correct)}>
+            <button key={o.key} type="button" className={values[0] === o.key ? "option selected" : "option"} aria-pressed={values[0] === o.key} disabled={done} onClick={() => answer(o.key === item.correct, [o.key])}>
               {o.label === o.key ? o.key : `${o.key}) ${o.label}`}
             </button>
           ))}
@@ -158,13 +160,14 @@ export function ItemView({ item }: { item: Item }) {
         {!done ? (
           <>
             <label className="sr-only" htmlFor={id + "-t"}>Your answer</label>
-            <textarea id={id + "-t"} rows={2} placeholder="Your answer (optional, only for you)" value={values[0] ?? ""} onChange={(e) => setValue(0, e.target.value)} />
+            <p className="muted">Self-check: several answers may be valid. Compare your answer with the example, or ask a tutor.</p>
+            <textarea id={id + "-t"} lang="de" rows={2} maxLength={MAX_ANSWER_LENGTH} placeholder="Your answer (optional, only for you)" value={values[0] ?? ""} onChange={(e) => setValue(0, e.target.value)} />
             {!selfShown ? (
               <button type="button" onClick={() => setSelfShown(true)}>Show answer</button>
             ) : (
               <div className="feedback neutral" aria-live="polite">
                 <p>
-                  <strong>Answer:</strong> <span className="pre">{item.display}</span>
+                  <strong>Example answer:</strong> <span className="pre" lang="de">{item.display}</span>
                 </p>
                 <p>Compare it yourself. Was your answer correct?</p>
                 <div className="options">
@@ -176,7 +179,8 @@ export function ItemView({ item }: { item: Item }) {
           </>
         ) : (
           <div className={`feedback ${state.firstTry ? "ok" : "bad"}`}>
-            <strong>{state.firstTry ? "Correct (self-checked)." : "Answer:"}</strong> <span className="pre">{item.display}</span>
+            {values[0] ? <p>Your answer: <span className="pre" lang="de">{values[0]}</span></p> : null}
+            <strong>{state.firstTry ? "Correct (self-checked)." : "Example answer:"}</strong> <span className="pre" lang="de">{item.display}</span>
           </div>
         )}
         {done ? <button type="button" className="link" onClick={reset}>Try again</button> : null}
@@ -191,7 +195,7 @@ export function ItemView({ item }: { item: Item }) {
         <Prompt text={item.prompt} blanks={item.blanks} values={values} setValue={setValue} disabled={done} label={label} />
       </p>
       {item.blanks === 0 ? (
-        <input className="full" aria-label={label} value={values[0] ?? ""} onChange={(e) => setValue(0, e.target.value)} disabled={done} autoComplete="off" autoCapitalize="off" spellCheck={false} />
+        <input className="full" lang="de" aria-label={label} value={values[0] ?? ""} onChange={(e) => setValue(0, e.target.value)} disabled={done} maxLength={MAX_ANSWER_LENGTH} autoComplete="off" autoCapitalize="off" spellCheck={false} />
       ) : null}
       <div className="row">
         {!done ? <button type="submit">Check</button> : null}

@@ -42,6 +42,7 @@
 html { -webkit-text-size-adjust: 100%; }
 body { margin: 0; background: var(--bg); color: var(--fg); line-height: 1.55; font-size: 1.0625rem; }
 main { max-width: 52rem; margin: 0 auto; padding: 1rem; }
+main[id], section[id] { scroll-margin-top: 8rem; }
 h1 { font-size: 1.6rem; line-height: 1.25; }
 h2 { font-size: 1.25rem; margin-top: 0; }
 h3 { font-size: 1.05rem; margin: 1.25rem 0 0.5rem; }
@@ -64,6 +65,7 @@ a { color: var(--accent); }
   .top nav { order: 3; flex-basis: 100%; flex-wrap: nowrap; overflow-x: auto; gap: 1rem; padding-bottom: 0.25rem; }
   .top nav a { white-space: nowrap; }
   main { padding: 0.75rem; }
+  main[id], section[id] { scroll-margin-top: 1rem; }
 }
 
 footer { max-width: 52rem; margin: 2rem auto; padding: 1rem; color: var(--muted); font-size: 0.9rem; }

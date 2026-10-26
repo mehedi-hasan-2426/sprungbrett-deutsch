@@ -21,6 +21,9 @@ useful phrases) stays in **German**.
 - **Instant feedback**: each answer is marked as soon as you press "Check"; a hint follows the
   first wrong answer, the solution and the rule follow the second. `ae/oe/ue/ss` are
   accepted for `ä/ö/ü/ß` with a spelling note; lowercase nouns are marked wrong.
+- **Open completions** use explicit self-assessment with an example answer, not an
+   exact-match grade. Submitted exercise answers remain visible after reloading;
+   older progress files without saved answers still load and show the model answer.
 - **Error categories** (verb position, case, gender, plural, verb form, preposition,
   vocabulary, pronunciation, spelling, listening) with practice suggestions once a
   category comes up three times in 30 days.

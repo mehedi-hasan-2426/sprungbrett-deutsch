@@ -5,6 +5,7 @@ import type { ItemState, Status } from "./grade.ts";
 export const STORAGE_KEY = "sprungbrett.progress";
 export const SCHEMA_VERSION = 1;
 export const MAX_IMPORT_BYTES = 1_000_000;
+export const MAX_ANSWER_LENGTH = 2000;
 const MAX_TEXT = 5000;
 const MAX_MISTAKES = 500;
 const MAX_DAYS = 400;
@@ -19,6 +20,7 @@ export interface ItemRecord {
   attempts: number;
   firstTry: boolean | null;
   at: number;
+  inputs?: string[];
 }
 
 export interface WritingRecord {
@@ -89,7 +91,12 @@ export function validateProgress(x: unknown): Progress {
     if (!isObject(v) || !STATUSES.includes(v.status as Status) || !int(v.attempts, 0, 100) || !(v.firstTry === null || typeof v.firstTry === "boolean") || !time(v.at)) {
       fail("items." + k + " is invalid");
     }
-    return { status: v.status as Status, attempts: v.attempts as number, firstTry: v.firstTry as boolean | null, at: v.at as number };
+    const entry: ItemRecord = { status: v.status as Status, attempts: v.attempts as number, firstTry: v.firstTry as boolean | null, at: v.at as number };
+    if (v.inputs !== undefined) {
+      if (!Array.isArray(v.inputs) || v.inputs.length > 8 || !v.inputs.every((input) => typeof input === "string" && input.length <= MAX_ANSWER_LENGTH)) fail("items." + k + ".inputs is invalid");
+      entry.inputs = [...v.inputs] as string[];
+    }
+    return entry;
   });
   const cards = record(x.cards, "cards", (v, k) => {
     if (!isObject(v) || !int(v.box, 1, 5) || typeof v.due !== "string" || !DAY.test(v.due) || !(v.learned === undefined || typeof v.learned === "boolean")) {
@@ -163,11 +170,11 @@ export function markDay(p: Progress, day: string): Progress {
   return { ...p, days: [...p.days, day].slice(-MAX_DAYS) };
 }
 
-export function recordAnswer(p: Progress, itemId: string, prev: ItemState, next: ItemState, tag: Category, now: number): Progress {
+export function recordAnswer(p: Progress, itemId: string, prev: ItemState, next: ItemState, tag: Category, now: number, inputs?: string[]): Progress {
   const firstMistake = prev.attempts === 0 && next.status !== "solved";
   return {
     ...p,
-    items: { ...p.items, [itemId]: { status: next.status, attempts: next.attempts, firstTry: next.firstTry, at: now } },
+    items: { ...p.items, [itemId]: { status: next.status, attempts: next.attempts, firstTry: next.firstTry, at: now, ...(inputs ? { inputs: inputs.slice(0, 8).map((input) => input.slice(0, MAX_ANSWER_LENGTH)) } : {}) } },
     mistakes: firstMistake ? [...p.mistakes, { tag, at: now }].slice(-MAX_MISTAKES) : p.mistakes,
   };
 }

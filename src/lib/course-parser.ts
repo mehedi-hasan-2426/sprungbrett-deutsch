@@ -219,7 +219,7 @@ function makeItem(ctx: Ctx, role: SectionRole, group: string, n: number, rawProm
     if (!correct || !options.some((o) => o.key === correct)) ctx.issues.push({ where, message: "choice answer not among options: " + parsed.display });
     return { ...base, prompt: choice?.prompt ?? rawPrompt, kind: "choice", blanks: 0, capStart: true, options, correct: correct ?? "", answers: [] };
   }
-  if (forceOpen || examples || role === "reading" || role === "listening" || role === "pronunciation") {
+  if (forceOpen || examples || /\bErgänze frei\b/i.test(rawPrompt) || role === "reading" || role === "listening" || role === "pronunciation") {
     return { ...base, prompt: rawPrompt, kind: "open", blanks: 0, capStart: true, answers: [] };
   }
 

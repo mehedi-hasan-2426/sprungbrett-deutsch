@@ -11,6 +11,22 @@ test("round trip export and import", () => {
   assert.deepEqual(parseImport(JSON.stringify(p)), p);
 });
 
+test("submitted answers survive reload and legacy records still import", () => {
+  const progress = recordAnswer(emptyProgress(), "w1-g1-4", { status: "new", attempts: 0, firstTry: null }, { status: "solved", attempts: 1, firstTry: true }, "VF", 1, ["Siehst", "fern"]);
+  const restored = parseImport(JSON.stringify(progress));
+  assert.deepEqual(restored.items["w1-g1-4"]?.inputs, ["Siehst", "fern"]);
+  const legacy = emptyProgress();
+  legacy.items["w1-g1-1"] = { status: "solved", attempts: 1, firstTry: true, at: 1 };
+  assert.deepEqual(parseImport(JSON.stringify(legacy)), legacy);
+});
+
+test("imported exercise answers must be bounded text", () => {
+  for (const inputs of [[3], [{ text: "answer" }], Array(9).fill("answer"), ["x".repeat(2001)]]) {
+    const progress = { ...emptyProgress(), items: { "w1-g1-1": { status: "solved", attempts: 1, firstTry: true, at: 1, inputs } } };
+    assert.throws(() => parseImport(JSON.stringify(progress)));
+  }
+});
+
 test("placement writing scores preserve all progress after reload", () => {
   const progress = emptyProgress();
   progress.writing["p-wr-1"] = { text: "Liebe Frau Klein,", score: [4, 3, 4], at: 1 };
