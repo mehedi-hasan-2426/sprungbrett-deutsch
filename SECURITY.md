@@ -52,4 +52,7 @@ npm run build             # also scans the generated HTML for CSP violations
 
 CI runs these on every push and pull request, together with lint, type checking,
 unit and content tests, `npm audit`, a gitleaks secret scan and CodeQL.
+CodeQL SARIF results are checked explicitly; High and Critical findings fail CI.
+The loopback preview serves only files registered from the static output directory,
+never filesystem paths constructed from requests.
 See [docs/threat-model.md](docs/threat-model.md) for the threat model.

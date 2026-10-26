@@ -18,7 +18,7 @@
     "lint": "eslint .",
     "typecheck": "npm run content && tsc --noEmit",
     "pretest": "npm run content",
-    "test": "node --experimental-strip-types --no-warnings --test \"tests/**/*.test.ts\"",
+    "test": "node --experimental-strip-types --no-warnings --test \"tests/**/*.test.ts\" \"tests/**/*.test.mjs\"",
     "verify": "node scripts/verify.mjs",
     "verify:negative": "node scripts/verify-negative.mjs"
   },

@@ -82,6 +82,12 @@ microphone for the site's own origin only.
 
 CI actions are pinned by commit SHA, the workflow token is read-only by default,
 checkout does not persist credentials, and downloaded tools are checksum-verified.
+`check-codeql.mjs` rejects SARIF findings with security severity 7 or greater,
+so a successful analysis upload alone cannot make the security gate green.
+
+The local preview builds its route map from the static output directory at startup.
+Requests only look up entries in that map; no request-derived path is passed to the
+filesystem. Traversal and malformed-URL regression tests enforce this boundary.
 
 ## Residual risks
 
@@ -106,6 +112,8 @@ checkout does not persist credentials, and downloaded tools are checksum-verifie
 | No learner name or personal files in content or output | Personal data disclosure |
 | Exact dependency pins, three runtime packages, lockfile | Supply chain drift |
 | Actions pinned to SHAs, read-only token | CI compromise |
+| CodeQL High/Critical SARIF gate | Security findings hidden by a successful upload |
+| Preview route allowlist and traversal tests | Request-derived filesystem access |
 | No secret-shaped strings, gitleaks on full history | Credential leakage |
 | Import schema validation (unit tests with hostile input) | Malicious progress files |
 
