@@ -48,4 +48,6 @@ if (missing.length) {
 }
 
 writeFileSync(OUT, JSON.stringify(english));
+const nav = english.weeks.map((w, k) => ({ n: k + 1, title: w.title, sections: w.sections.map((s) => ({ id: s.id, title: s.title, role: s.role })) }));
+writeFileSync(join(dirname(OUT), "nav.json"), JSON.stringify(nav));
 console.log(`content: ${course.weeks.length} weeks, ${itemCount} exercises, ${course.vocab.length} words, ${course.checkpoints.length} checkpoints, instructions in English`);
