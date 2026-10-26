@@ -3,7 +3,7 @@ import { useState } from "react";
 import type { GetStaticProps } from "next";
 import { Layout } from "../src/components/Layout.tsx";
 import { loadCourse, weekSummaries } from "../src/server/load.ts";
-import { currentWeek } from "../src/lib/weeks.ts";
+import { currentWeek, ROLE_LABEL } from "../src/lib/weeks.ts";
 import type { WeekSummary } from "../src/lib/weeks.ts";
 import { useProgress } from "../src/state/ProgressContext.tsx";
 import { dayKey, dueCards, newCardAllowance, addDays } from "../src/lib/leitner.ts";
@@ -15,15 +15,6 @@ interface Props {
   placementIds: string[];
   roleOrder: string[];
 }
-
-const ROLE_LABEL: Record<string, string> = {
-  exercises: "Grammar exercises",
-  retrieval: "Vocabulary recall",
-  reading: "Reading",
-  listening: "Listening",
-  pronunciation: "Pronunciation",
-  quiz: "Review quiz",
-};
 
 export default function Home({ weeks, placementIds, roleOrder }: Props) {
   const { progress, ready } = useProgress();
@@ -71,7 +62,7 @@ export default function Home({ weeks, placementIds, roleOrder }: Props) {
         ) : null}
         <section className="card">
           <h2>Tired? Short day</h2>
-          <p>15 minutes: cards, listen once, say three sentences. A short day counts.</p>
+          <p>15 minutes: cards and three sentences said aloud. A short day counts.</p>
           <Link className="button secondary" href="/kurz">Start a short day</Link>
         </section>
       </div>
@@ -122,8 +113,8 @@ export const getStaticProps: GetStaticProps<Props> = () => {
   return {
     props: {
       weeks: weekSummaries(course),
-      placementIds: Object.values(course.placement.items).filter((i) => i.kind !== "open").map((i) => i.id),
-      roleOrder: ["exercises", "retrieval", "reading", "listening", "pronunciation", "quiz"],
+      placementIds: Object.values(course.placement.items).filter((i) => i.kind !== "open" && !i.id.startsWith("p-b")).map((i) => i.id),
+      roleOrder: ["exercises", "retrieval", "reading", "pronunciation", "quiz"],
     },
   };
 };

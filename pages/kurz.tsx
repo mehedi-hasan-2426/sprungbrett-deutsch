@@ -3,20 +3,19 @@ import Link from "next/link";
 import type { GetStaticProps } from "next";
 import { Layout } from "../src/components/Layout.tsx";
 import { InlineText } from "../src/components/Blocks.tsx";
-import { ListeningPlayer } from "../src/components/ListeningPlayer.tsx";
+import { ListeningSoon } from "../src/components/ListeningSoon.tsx";
 import { loadCourse, weekSummaries } from "../src/server/load.ts";
 import { currentWeek } from "../src/lib/weeks.ts";
 import type { WeekSummary } from "../src/lib/weeks.ts";
-import type { Inline, ScriptPart } from "../src/lib/types.ts";
+import type { Inline } from "../src/lib/types.ts";
 import { useProgress } from "../src/state/ProgressContext.tsx";
 
 interface Props {
   weeks: WeekSummary[];
-  scripts: ScriptPart[][];
   shortDays: Inline[][];
 }
 
-export default function ShortDay({ weeks, scripts, shortDays }: Props) {
+export default function ShortDay({ weeks, shortDays }: Props) {
   const { progress, update } = useProgress();
   const [done, setDone] = useState(false);
   const week = currentWeek(weeks, progress);
@@ -32,8 +31,8 @@ export default function ShortDay({ weeks, scripts, shortDays }: Props) {
         <Link className="button" href="/karten">Open flashcards</Link>
       </section>
       <section className="card">
-        <h2>2. Listening (5 min): {week?.title}</h2>
-        <ListeningPlayer parts={scripts[k] ?? []} itemIds={week?.ids.listening ?? []} />
+        <h2>2. Listening</h2>
+        <ListeningSoon compact />
       </section>
       <section className="card">
         <h2>3. Speaking (5 min)</h2>
@@ -63,7 +62,6 @@ export const getStaticProps: GetStaticProps<Props> = () => {
   return {
     props: {
       weeks: weekSummaries(course),
-      scripts: course.weeks.map((w) => w.script),
       shortDays: course.weeks.map((w) => w.shortDay),
     },
   };

@@ -21,7 +21,7 @@ interface Props {
   checklist: string[];
 }
 
-const AREAS = ["Review quiz", "Reading", "Listening", "Writing", "Speaking"];
+const AREAS = ["Review quiz", "Reading", "Writing", "Speaking"];
 
 export default function CheckpointPage({ cp, week, tasks, speakingKey, criteria, checklist }: Props) {
   const { progress, update } = useProgress();
@@ -35,7 +35,7 @@ export default function CheckpointPage({ cp, week, tasks, speakingKey, criteria,
     : null;
   const speakingScore = progress.speaking[speakingKey] ?? [];
   const speaking = speakingScore.length === SPEAKING_CRITERIA.length ? percent(speakingScore.reduce((a, b) => a + b, 0), 9) : null;
-  const areas = [firstTry(week.ids.quiz ?? []), firstTry(week.ids.reading ?? []), firstTry(week.ids.listening ?? []), writing, speaking];
+  const areas = [firstTry(week.ids.quiz ?? []), firstTry(week.ids.reading ?? []), writing, speaking];
   const { advice, below } = advise(areas);
   const canDo = progress.canDo[`cp${cp.n}`] ?? [];
 

@@ -24,14 +24,14 @@ export function InlineText({ segs }: { segs: Inline[] }) {
   );
 }
 
-export function Blocks({ blocks, items, renderItem }: { blocks: Block[]; items?: Record<string, Item>; renderItem?: (item: Item) => ReactNode }) {
+export function Blocks({ blocks, items, renderItem, idPrefix }: { blocks: Block[]; items?: Record<string, Item>; renderItem?: (item: Item) => ReactNode; idPrefix?: string }) {
   return (
     <>
       {blocks.map((b, k) => {
         switch (b.kind) {
           case "h":
             return (
-              <h3 key={k}>
+              <h3 key={k} id={idPrefix ? `${idPrefix}-${k}` : undefined}>
                 <InlineText segs={b.text} />
               </h3>
             );

@@ -3,6 +3,7 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 import type { ReactNode } from "react";
 import { useProgress } from "../state/ProgressContext.tsx";
+import { Sidebar } from "./Sidebar.tsx";
 
 const NAV = [
   { href: "/", label: "Today" },
@@ -26,7 +27,7 @@ export function Layout({ children, title }: { children: ReactNode; title?: strin
       </a>
       <header className="top">
         <Link href="/" className="brand">
-          Sprungbrett <span className="muted">A1 → A2</span>
+          Sprungbrett <span className="brand-tag">A1 → A2</span>
         </Link>
         <nav aria-label="Main navigation">
           {NAV.map((n) => (
@@ -41,7 +42,10 @@ export function Layout({ children, title }: { children: ReactNode; title?: strin
           Your progress can't be saved in this browser (private mode or storage full). Export it on the Progress page.
         </p>
       ) : null}
-      <main id="main">{children}</main>
+      <div className="shell">
+        <Sidebar />
+        <main id="main">{children}</main>
+      </div>
       <footer>
         <p>
           Everything stays on your device: no accounts, no tracking, no uploads. <Link href="/info">Privacy and licences</Link>

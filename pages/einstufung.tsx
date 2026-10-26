@@ -13,9 +13,10 @@ interface Props {
   parts: { teil: string; label: string; ids: string[]; points: number }[];
 }
 
+const MAX = 56;
 const BANDS = [
-  { min: 50, text: "A1 secure: go through week 1 quickly, then continue normally." },
-  { min: 35, text: "A1 with gaps: follow the plan as it is. Watch the gaps on the Progress page." },
+  { min: 0.82, text: "A1 secure: go through week 1 quickly, then continue normally." },
+  { min: 0.57, text: "A1 with gaps: follow the plan as it is. Watch the gaps on the Progress page." },
   { min: 0, text: "A1 not yet secure: spend two weeks each on weeks 1 and 2. That is normal." },
 ];
 
@@ -35,7 +36,7 @@ export default function Placement({ unit, rubric, parts }: Props) {
   const f = speaking.length === SPEAKING_CRITERIA.length ? speaking.reduce((a, b) => a + b, 0) : null;
   const complete = auto.every((p) => p.done) && e !== null && f !== null;
   const total = auto.reduce((s, p) => s + p.correct, 0) + (e ?? 0) + (f ?? 0);
-  const band = BANDS.find((b) => total >= b.min);
+  const band = BANDS.find((b) => total >= b.min * MAX);
 
   return (
     <Layout title="Placement test">
@@ -50,11 +51,12 @@ export default function Placement({ unit, rubric, parts }: Props) {
               Part {p.teil} ({p.label}): {p.correct} / {p.points} {p.done ? "" : "– not finished yet"}
             </li>
           ))}
+          <li>Part B (listening): coming soon, not scored</li>
           <li>Part E (writing): {e ?? "–"} / 12 {e === null ? "– submit your text and rate it" : ""}</li>
           <li>Part F (speaking): {f ?? "–"} / 9 {f === null ? "– self-rating missing" : ""}</li>
         </ul>
         <p>
-          <strong>Total: {total} / 61</strong>
+          <strong>Total: {total} / {MAX}</strong>
         </p>
         {complete && band ? <p className="feedback neutral">{band.text}</p> : <p className="muted">The recommendation appears when all parts are finished.</p>}
       </section>
@@ -65,7 +67,7 @@ export default function Placement({ unit, rubric, parts }: Props) {
 export const getStaticProps: GetStaticProps<Props> = () => {
   const course = loadCourse();
   const unit = course.placement;
-  const labels: Record<string, [string, number]> = { A: ["reading", 5], B: ["listening", 5], C: ["vocabulary", 10], D: ["grammar", 20] };
+  const labels: Record<string, [string, number]> = { A: ["reading", 5], C: ["vocabulary", 10], D: ["grammar", 20] };
   const parts = Object.entries(labels).map(([teil, [label, points]]) => ({
     teil,
     label,

@@ -18,7 +18,6 @@ const COLUMNS: [string, string][] = [
   ["exercises", "Grammar"],
   ["retrieval", "Words"],
   ["reading", "Reading"],
-  ["listening", "Listening"],
   ["quiz", "Quiz"],
 ];
 
