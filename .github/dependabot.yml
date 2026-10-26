@@ -1,0 +1,35 @@
+version: 2
+
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      next-react:
+        patterns:
+          - "next"
+          - "@next/*"
+          - "react"
+          - "react-dom"
+          - "@types/react*"
+    commit-message:
+      prefix: deps
+    labels:
+      - dependencies
+      - security
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    # One PR for all actions so codeql-action init and analyze stay on the same version.
+    groups:
+      actions:
+        patterns:
+          - "*"
+    commit-message:
+      prefix: ci
+    labels:
+      - dependencies
+      - security

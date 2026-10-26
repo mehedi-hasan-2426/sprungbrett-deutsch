@@ -1,0 +1,29 @@
+Sprungbrett
+Copyright (c) 2026 Mehedi Hasan
+
+Source code: MIT License, see LICENSE.
+
+Course content (content/source/): all exercises, texts, listening scripts, answer keys
+and model texts are original work by the author. All rights reserved; no licence is
+granted for reuse outside this project unless stated otherwise in a later release.
+The exercises are written in the style of common A2 exam formats but are not official
+telc, Goethe or other examination material and are not endorsed by any exam provider.
+
+Third-party runtime software (bundled into the built site):
+- Next.js (MIT) - https://github.com/vercel/next.js
+- React and React DOM (MIT) - https://github.com/facebook/react
+
+No fonts, icons, images or audio files are bundled. Text uses the device's system fonts;
+listening uses the browser's built-in speech synthesis.
+
+Ideas only, no code copied. These open-source projects informed the design:
+- https://github.com/ankitects/anki (licence listed as "other" by GitHub; consult its licence files): self-grading after revealing a card. Last push: 2026-10-26.
+- https://github.com/h16nning/skola (AGPL-3.0): local-first storage in the browser, no account required. Last push: 2026-07-12.
+- https://github.com/wetterkrank/dasbot (MIT): a dedicated der/die/das article drill with spaced repetition. Last push: 2026-10-20.
+- https://github.com/proycon/vocage (GPL-3.0): minimal vocabulary review. Last push: 2024-07-06; historical reference, not recently active.
+- https://github.com/open-spaced-repetition/ts-fsrs (MIT): separating review scheduling from the interface and testing scheduler behavior. Last push: 2026-10-25. This app uses its own fixed Leitner intervals, not FSRS.
+
+Repository licence metadata and last-push dates checked on GitHub on 2026-10-26.
+
+External learning resources linked from the course (not bundled, verified 2026-10-26):
+Deutsche Welle "Deutsch lernen", ÖIF Sprachportal, telc Start Deutsch 2 information page.
