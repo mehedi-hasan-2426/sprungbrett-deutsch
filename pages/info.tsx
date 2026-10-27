@@ -10,10 +10,12 @@ export default function Info() {
         <h2>Privacy</h2>
         <ul>
           <li>Access is restricted to two approved Google accounts. Google handles sign-in; an encrypted, HTTP-only session cookie expires after at most eight hours. No ads or analytics are used.</li>
-          <li>Your progress and your texts are stored only in this browser's local storage. They only leave your device if you export them yourself.</li>
+          <li>Your exercise answers, writing drafts, flashcard progress and self-ratings sync over HTTPS to a private Neon Postgres record for your signed-in account. Vercel handles the authenticated save requests.</li>
+          <li>This browser keeps a local copy for interrupted connections. Different device versions require an explicit choice; the other copy is backed up locally before replacement. Export remains available for an independent backup.</li>
           <li>Recordings stay only in the open tab and are never saved or uploaded.</li>
           <li>Listening is coming soon and is not scored. No audio is uploaded or played by a remote service.</li>
           <li>Progress is separated by account in local storage, not encrypted against other people using the same browser profile. Use separate browser profiles on shared devices.</li>
+          <li>Resetting progress replaces your account's current saved progress with an empty copy. Existing exports, local conflict-recovery copies and provider-managed historical backups are not erased by that reset.</li>
           <li>The hosting provider may process technical access data (e.g. IP address) to run the site.</li>
         </ul>
       </section>

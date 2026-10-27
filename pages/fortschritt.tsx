@@ -22,7 +22,7 @@ const COLUMNS: [string, string][] = [
 ];
 
 export default function ProgressPage({ weeks }: Props) {
-  const { progress, replace, legacyAvailable, importLegacy } = useProgress();
+  const { progress, replace, legacyAvailable, importLegacy, syncStatus, conflict, syncNow, resolveSync, recoveryAvailable, restoreRecovery } = useProgress();
   const [message, setMessage] = useState<string | null>(null);
   const file = useRef<HTMLInputElement>(null);
 
@@ -65,7 +65,7 @@ export default function ProgressPage({ weeks }: Props) {
   };
 
   const reset = () => {
-    if (window.confirm("Really delete ALL progress in this browser? Export it first if you want to keep it.")) {
+    if (window.confirm("Reset this account's current progress and sync the empty copy to other devices? Existing exports and recovery backups are kept. Export a backup first.")) {
       replace(emptyProgress());
       setMessage("Progress deleted.");
     }
@@ -75,6 +75,31 @@ export default function ProgressPage({ weeks }: Props) {
     <Layout title="Progress">
       <h1>Progress</h1>
       <p className="muted">Percent = correct on the first try. Self-assessment, not a certificate.</p>
+      <section className="sync-panel" aria-labelledby="sync-heading">
+        <h2 id="sync-heading">Account save</h2>
+        <p role="status">{syncStatus === "saved" ? "Saved to your account." : syncStatus === "conflict" ? "Device and cloud progress differ. Choose a copy; the other is kept as a recovery backup on this device." : syncStatus === "offline" ? "Cloud sync is unavailable. Your device copy is kept; retry when online." : "Progress sync is in progress."}</p>
+        {conflict ? (
+          <>
+            <p>This device: {Object.keys(progress.items).length} exercise records. Cloud: {Object.keys(conflict.progress?.items ?? {}).length} exercise records.</p>
+            <div className="row">
+              {(["local", "cloud"] as const).map((side) => <button key={side} type="button" className={side === "cloud" ? "secondary" : undefined} onClick={async () => {
+                if (!window.confirm(side === "local" ? "Replace the shown cloud version with this device's progress? The cloud copy will be backed up here first." : "Replace this device's progress with the shown cloud version? Your device copy will be backed up here first.")) return;
+                try {
+                  const done = await resolveSync(side);
+                  setMessage(done ? "Progress choice saved." : "Progress changed again or sync failed. Both copies are still kept; review the current status.");
+                } catch (error) {
+                  setMessage(error instanceof Error ? error.message : "Unable to resolve progress.");
+                }
+              }}>{side === "local" ? "Keep Device Copy" : "Use Cloud Copy"}</button>)}
+            </div>
+          </>
+        ) : <button type="button" className="secondary" disabled={syncStatus === "loading" || syncStatus === "saving"} onClick={async () => setMessage(await syncNow() ? "Progress synced." : "Sync did not finish. Your device copy is kept.")}>Sync Now</button>}
+        {recoveryAvailable ? <button type="button" className="secondary" onClick={() => {
+          if (!window.confirm("Restore the saved conflict backup on this device? It will be synced and may need another conflict decision.")) return;
+          try { restoreRecovery(); setMessage("Recovery copy restored on this device."); }
+          catch (error) { setMessage(error instanceof Error ? error.message : "Recovery failed."); }
+        }}>Restore Recovery Copy</button> : null}
+      </section>
       <section className="card">
         <h2>Weeks</h2>
         <div className="table-wrap">
@@ -146,7 +171,7 @@ export default function ProgressPage({ weeks }: Props) {
 
       <section className="card">
         <h2>Back up and transfer</h2>
-        <p>Your progress is stored only in this browser. Export it as a file to back it up or move it to another device.</p>
+        <p>Progress syncs to your Google-account identity when available. Export a file for an independent backup; importing replaces this account's device copy and will sync after any conflict is resolved.</p>
         {legacyAvailable ? (
           <button type="button" className="secondary" onClick={() => {
             if (!window.confirm("Assign the previous anonymous browser progress to this Google account and replace this account's current progress? Export current progress first. The anonymous copy will be removed only after saving.")) return;
@@ -162,7 +187,7 @@ export default function ProgressPage({ weeks }: Props) {
           <button type="button" onClick={exportJson}>Export</button>
           <button type="button" className="secondary" onClick={() => file.current?.click()}>Import</button>
           <input ref={file} type="file" accept="application/json,.json" className="sr-only" onChange={importJson} aria-label="Import a progress file" />
-          <button type="button" className="danger" onClick={reset}>Delete everything</button>
+          <button type="button" className="danger" onClick={reset}>Reset Progress</button>
         </div>
         {message ? <p role="status">{message}</p> : null}
       </section>

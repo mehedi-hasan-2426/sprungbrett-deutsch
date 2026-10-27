@@ -31,6 +31,7 @@ const child = spawn(process.execPath, [join(root, "node_modules/next/dist/bin/ne
     NEXTAUTH_URL: `https://localhost:${port}`, NEXTAUTH_SECRET: secret,
     GOOGLE_CLIENT_ID: "synthetic-client", GOOGLE_CLIENT_SECRET: "synthetic-only",
     ALLOWED_EMAILS: "first@example.com,second@example.org",
+    DATABASE_URL: "",
   },
   stdio: ["ignore", "pipe", "pipe"],
 });
@@ -121,6 +122,16 @@ try {
   assert.match(firstSession.accountKey, /^[a-f0-9]{64}$/);
   assert.ok(!("access_token" in firstSession) && !("id_token" in firstSession));
   console.log("PASS account keys are distinct; session endpoint exposes no provider tokens");
+  assert.equal((await request("/api/progress")).status, 401);
+  assert.equal((await request("/api/progress", await cookie({ email: "other@example.com" }))).status, 401);
+  const unavailable = await request("/api/progress", firstCookie);
+  assert.equal(unavailable.status, 503);
+  assert.match(unavailable.headers.get("cache-control") ?? "", /private.*no-store/);
+  const foreignSave = await fetch(origin + "/api/progress", {
+    method: "PUT", headers: { cookie: firstCookie, origin: "https://evil.example", "content-type": "application/json", "x-sprungbrett-sync": "1" }, body: "{}",
+  });
+  assert.equal(foreignSave.status, 403);
+  console.log("PASS progress API denies anonymous, disallowed and cross-site requests; absent database fails closed");
   const csrf = await (await request("/api/auth/csrf")).json();
   assert.ok(typeof csrf.csrfToken === "string" && csrf.csrfToken.length > 10);
   const signout = await fetch(origin + "/api/auth/signout", { method: "POST", redirect: "manual", headers: { "content-type": "application/x-www-form-urlencoded" }, body: "callbackUrl=/&json=true" });

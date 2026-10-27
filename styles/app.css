@@ -70,6 +70,9 @@ main[id], section[id], h3[id] { scroll-margin-top: 5rem; }
 
 .shell { display: grid; grid-template-columns: 17rem minmax(0, 1fr); max-width: 84rem; margin: 0 auto; }
 .signin { width: min(100%, 36rem); margin: 4rem auto; padding: 1.5rem; }
+.account-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1rem; }
+.save-state { font-size: 0.8rem; min-width: 7rem; }
+.sync-panel { padding: 1rem 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
 main { padding: 1.5rem 2rem 2rem; min-width: 0; max-width: 60rem; }
 
 .sidebar { border-right: 1px solid var(--line); }
