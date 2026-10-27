@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import type { ChangeEvent } from "react";
+import Link from "next/link";
 import { protect } from "../src/server/protect.ts";
 import { Layout } from "../src/components/Layout.tsx";
 import { loadCourse, weekSummaries } from "../src/server/load.ts";
@@ -12,6 +13,7 @@ import { useProgress } from "../src/state/ProgressContext.tsx";
 
 interface Props {
   weeks: WeekSummary[];
+  grammar: { slug: string; title: string; level: string; ids: string[] }[];
 }
 
 const COLUMNS: [string, string][] = [
@@ -21,7 +23,7 @@ const COLUMNS: [string, string][] = [
   ["quiz", "Quiz"],
 ];
 
-export default function ProgressPage({ weeks }: Props) {
+export default function ProgressPage({ weeks, grammar }: Props) {
   const { progress, replace, legacyAvailable, importLegacy, syncStatus, conflict, syncNow, resolveSync, recoveryAvailable, restoreRecovery } = useProgress();
   const [message, setMessage] = useState<string | null>(null);
   const file = useRef<HTMLInputElement>(null);
@@ -101,12 +103,12 @@ export default function ProgressPage({ weeks }: Props) {
         }}>Restore Recovery Copy</button> : null}
       </section>
       <section className="card">
-        <h2>Weeks</h2>
+        <h2>Everyday topics</h2>
         <div className="table-wrap">
           <table>
             <thead>
               <tr>
-                <th scope="col">Week</th>
+                <th scope="col">Topic</th>
                 {COLUMNS.map(([, label]) => (
                   <th key={label} scope="col">{label}</th>
                 ))}
@@ -155,7 +157,7 @@ export default function ProgressPage({ weeks }: Props) {
         <p className="muted">Extra practice is tracked separately and does not change your core checkpoint scores.</p>
         <div className="table-wrap">
           <table>
-            <thead><tr><th scope="col">Week</th><th scope="col">Easy</th><th scope="col">Medium</th><th scope="col">Hard</th></tr></thead>
+            <thead><tr><th scope="col">Topic</th><th scope="col">Easy</th><th scope="col">Medium</th><th scope="col">Hard</th></tr></thead>
             <tbody>{weeks.map((week) => (
               <tr key={week.n}>
                 <th scope="row">{week.n}</th>
@@ -191,8 +193,25 @@ export default function ProgressPage({ weeks }: Props) {
         </div>
         {message ? <p role="status">{message}</p> : null}
       </section>
+      <section>
+        <h2>Grammar topics</h2>
+        <div className="table-wrap"><table>
+          <thead><tr><th scope="col">Topic</th><th scope="col">Level</th><th scope="col">Done</th><th scope="col">Correct first try</th></tr></thead>
+          <tbody>{grammar.map((topic) => {
+            const score = groupScore(progress, topic.ids);
+            return <tr key={topic.slug}>
+              <th scope="row"><Link href={`/grammatik/${topic.slug}`}>{topic.title}</Link></th>
+              <td>{topic.level}</td><td>{score.done}/{score.total}</td><td>{score.correct}/{score.total}</td>
+            </tr>;
+          })}</tbody>
+        </table></div>
+      </section>
     </Layout>
   );
 }
 
-export const getServerSideProps = protect<Props>(() => ({ props: { weeks: weekSummaries(loadCourse()) } }));
+export const getServerSideProps = protect<Props>(() => {
+  const course = loadCourse();
+  const grammar = (course.grammar ?? []).map(({ slug, title, level, items }) => ({ slug, title, level, ids: items.map((item) => item.id) }));
+  return { props: { weeks: weekSummaries(course), grammar } };
+});

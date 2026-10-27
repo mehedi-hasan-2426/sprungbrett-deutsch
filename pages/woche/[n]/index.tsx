@@ -28,12 +28,12 @@ export default function WeekPage({ n, title, intro, shortDay, lessons, checkpoin
   const { progress, ready } = useProgress();
   const t = weekTitle(title);
   return (
-    <Layout title={`Week ${n}`}>
+    <Layout title={`Topic ${n}`}>
       <nav className="crumbs" aria-label="Breadcrumb">
-        <Link href="/plan">Course</Link> <span aria-hidden="true">/</span> <span>Week {n}</span>
+        <Link href="/plan">Topics</Link> <span aria-hidden="true">/</span> <span>Topic {n}</span>
       </nav>
       <header className="week-head">
-        <p className="eyebrow">Week {n} of 12</p>
+        <p className="eyebrow">Topic {n} · At your own pace</p>
         <h1>{t.german}</h1>
         {t.english ? <p className="lede">{t.english}</p> : null}
       </header>
@@ -78,9 +78,9 @@ export default function WeekPage({ n, title, intro, shortDay, lessons, checkpoin
           </Link>
         </p>
       ) : null}
-      <nav className="pager" aria-label="Weeks">
-        {n > 1 ? <Link href={`/woche/${n - 1}`}>← Week {n - 1}</Link> : <span />}
-        {n < 12 ? <Link href={`/woche/${n + 1}`}>Week {n + 1} →</Link> : <Link href="/checkpoint/3">Checkpoint 3 →</Link>}
+      <nav className="pager" aria-label="Topics">
+        {n > 1 ? <Link href={`/woche/${n - 1}`}>← Topic {n - 1}</Link> : <span />}
+        {n < 12 ? <Link href={`/woche/${n + 1}`}>Topic {n + 1} →</Link> : <Link href="/checkpoint/3">Checkpoint 3 →</Link>}
       </nav>
     </Layout>
   );

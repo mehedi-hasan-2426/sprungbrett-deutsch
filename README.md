@@ -1,7 +1,7 @@
 # Sprungbrett · Deutsch A1 → A2
 
 A privacy-first web app for practising German from A1 to A2, with instant feedback.
-It turns a 12-week course (placement test, weekly modules, checkpoints) into
+It turns a self-paced course (placement test, everyday topics, checkpoints) into
 interactive exercises. Course access requires one of exactly two approved Google
 accounts. Learning progress syncs privately to Neon Postgres, separated by account,
 with a local browser copy for interrupted connections. No analytics are used.
@@ -16,10 +16,12 @@ meaning, forms, and an original German example with an English translation.
 ## Features
 
 - **Placement test** with automatic scoring and a recommendation.
-- **12 weekly modules**: vocabulary, grammar explanations, grammar exercises,
+- **12 everyday topic modules**: vocabulary, grammar explanations, grammar exercises,
   vocabulary retrieval, reading, listening, speaking, pronunciation, writing and a
-   cumulative quiz. 678 exercises in total, including 108 extra practice items.
-- **366 vocabulary entries**, including 120 new entries: ten per week.
+   cumulative quiz. 930 exercises in total, including 108 extra topic-practice items.
+- **28 grammar topics** with 252 original exercises, explanations and Easy/Medium/Hard
+  practice. Advanced passive forms are clearly marked as optional extensions.
+- **366 vocabulary entries**, including 120 new entries: ten per topic.
 - **Easy, Medium and Hard** extra practice: recognition, guided completion and
    open reading responses. Core checkpoint scores are unchanged; extra practice
    has its own progress table. Hard remains within everyday A2 contexts.
@@ -94,8 +96,8 @@ node scripts/test-server.mjs # production-route tests with synthetic sessions
    IDs are preserved and schema-v1 progress exports still import. New reading
    responses are self-assessed, not falsely exact-match graded.
 
-The [learning references](docs/learning-sources.md) record five independent sources
-inspected before enrichment, their contributions and textbook-access limitations.
+The [learning references](docs/learning-sources.md) record sources used for the
+initial enrichment. Additional practice links are available inside grammar topics.
 
 ## Security model
 

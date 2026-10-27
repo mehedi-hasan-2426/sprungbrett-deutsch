@@ -30,7 +30,7 @@ export function Sidebar() {
         <input id="course-search" type="search" placeholder="Search lessons" value={term} onChange={(e) => setTerm(e.target.value)} />
         <ul className="side-top">
           <li><Link href="/einstufung" aria-current={path === "/einstufung" ? "page" : undefined}>Placement test</Link></li>
-          <li><Link href="/plan" aria-current={path === "/plan" ? "page" : undefined}>Study plan</Link></li>
+          <li><Link href="/plan" aria-current={path === "/plan" ? "page" : undefined}>Learning path</Link></li>
         </ul>
         <ol className="side-weeks">
           {weeks.map((w) => {

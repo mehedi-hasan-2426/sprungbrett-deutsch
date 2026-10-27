@@ -30,7 +30,7 @@ export const ROLE_LABEL: Record<string, string> = {
 };
 
 export function weekTitle(title: string): { german: string; english: string } {
-  const m = title.match(/^Week \d+: (.+?)(?: \(([^)]*)\))?(?: · .*)?$/);
+  const m = title.match(/^(?:Week|Topic) \d+: (.+?)(?: \(([^)]*)\))?(?: · .*)?$/);
   return { german: m?.[1] ?? title, english: m?.[2] ?? "" };
 }
 

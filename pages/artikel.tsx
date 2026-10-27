@@ -84,11 +84,11 @@ export default function ArticleDrill({ nouns }: Props) {
   return (
     <Layout title="der, die, das">
       <h1>der, die, das – and the plural</h1>
-      <p className="muted">10 nouns from your weeks. First choose the article, then type the plural. Mistakes count on the Progress page as gender (GE) or plural (PL).</p>
+      <p className="muted">10 nouns from your topics. First choose the article, then type the plural. Mistakes count on the Progress page as gender (GE) or plural (PL).</p>
       {!round ? (
         <section className="card">
           <label>
-            Words up to week{" "}
+            Words up to topic{" "}
             <select value={maxWeek} onChange={(e) => setMaxWeek(Number(e.target.value))}>
               {Array.from({ length: 12 }, (_, k) => (
                 <option key={k} value={k + 1}>

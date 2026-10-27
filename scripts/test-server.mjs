@@ -57,7 +57,7 @@ try {
   assert.match(buildId, /^[A-Za-z0-9_-]{1,128}$/);
   const reading = { id: "5-lesen" };
   const vocab = { id: "1-wortschatz" };
-  const routes = ["/", "/karten", "/fortschritt", "/info", "/plan", "/einstufung", "/artikel", "/kurz", "/checkpoint/1", "/material/wortschatz", "/woche/1", `/woche/1/${reading.id}`, `/_next/data/${buildId}/woche/1.json`, `/_next/data/${buildId}/woche/1/${reading.id}.json`];
+  const routes = ["/", "/karten", "/fortschritt", "/info", "/plan", "/einstufung", "/artikel", "/kurz", "/checkpoint/1", "/material/wortschatz", "/material/grammatik", "/grammatik/cases/dative", "/woche/1", `/woche/1/${reading.id}`, `/_next/data/${buildId}/woche/1.json`, `/_next/data/${buildId}/woche/1/${reading.id}.json`, `/_next/data/${buildId}/grammatik/cases/dative.json`];
   const cookie = async (overrides = {}) => {
     const token = await encode({ secret, maxAge: 8 * 60 * 60, token: { sub: "synthetic-first", email: "first@example.com", provider: "google", verified: true, signedInAt: Date.now(), ...overrides } });
     return `__Secure-next-auth.session-token=${token}`;
@@ -90,6 +90,14 @@ try {
     assert.match(response.headers.get("content-security-policy") ?? "", /script-src 'self'/);
   }
   console.log("PASS both synthetic approved accounts receive bilingual lessons with private caching and strict CSP");
+  const grammar = await request("/grammatik/cases/dative", firstCookie);
+  assert.equal(grammar.status, 200);
+  const grammarHtml = await grammar.text();
+  assert.ok(grammarHtml.includes("Dative case") && grammarHtml.includes("Grammar in context"));
+  assert.ok(!grammarHtml.includes("Week 1") && !grammarHtml.includes("of 12"));
+  const planHtml = await (await request("/plan", firstCookie)).text();
+  assert.ok(planHtml.includes("Your learning path") && !/12.week|Week 1/.test(planHtml));
+  console.log("PASS authenticated grammar and self-paced learning path render without a fixed-week schedule");
   for (const active of [firstCookie, secondCookie]) {
     const signIn = await request("/signin", active);
     assert.equal(signIn.status, 307);

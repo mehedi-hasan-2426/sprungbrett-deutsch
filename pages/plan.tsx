@@ -19,7 +19,7 @@ const MATERIAL: [string, string][] = [
 
 export default function Plan({ doc }: { doc: Doc }) {
   return (
-    <Layout title="Study plan">
+    <Layout title="Learning path">
       <h1>{doc.title}</h1>
       <section className="card">
         <h2>Material</h2>

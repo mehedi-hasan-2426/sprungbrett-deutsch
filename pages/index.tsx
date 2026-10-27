@@ -57,7 +57,7 @@ export default function Home({ weeks, placementIds, roleOrder }: Props) {
           <section className="card">
             <h2>{week.title}</h2>
             <p>{nextRole ? <>Continue with: <strong>{ROLE_LABEL[nextRole]}</strong></> : "Exercises done – don't forget speaking and writing."}</p>
-            <Link className="button" href={`/woche/${week.n}`}>Open week {week.n}</Link>
+            <Link className="button" href={`/woche/${week.n}`}>Open topic {week.n}</Link>
           </section>
         ) : null}
         <section className="card">
@@ -90,15 +90,15 @@ export default function Home({ weeks, placementIds, roleOrder }: Props) {
       </section>
 
       <section className="card">
-        <h2>All weeks</h2>
+        <h2>Everyday topics</h2>
         <ol className="weeks">
           {weeks.map((w) => {
             const all = Object.values(w.ids).flat();
             const s = groupScore(progress, all);
             return (
               <li key={w.n}>
-                <Link href={`/woche/${w.n}`}>{w.title.replace(/^Week \d+: /, "")}</Link>{" "}
-                <meter min={0} max={s.total || 1} value={s.done} aria-label={`Week ${w.n} done`} /> <span className="muted">{s.done}/{s.total}</span>
+                <Link href={`/woche/${w.n}`}>{w.title.replace(/^Topic \d+: /, "")}</Link>{" "}
+                <meter min={0} max={s.total || 1} value={s.done} aria-label={`Topic ${w.n} done`} /> <span className="muted">{s.done}/{s.total}</span>
               </li>
             );
           })}

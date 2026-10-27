@@ -42,15 +42,15 @@ export default function CheckpointPage({ cp, week, tasks, speakingKey, criteria,
   return (
     <Layout title={`Checkpoint ${cp.n}`}>
       <h1>
-        Checkpoint {cp.n} (end of week {cp.week})
+        Checkpoint {cp.n} (topic {cp.week} review)
       </h1>
       <p className="feedback neutral">
         <strong>Self-assessment, not a certificate.</strong> You only get an official A2 certificate by passing an official exam.
       </p>
 
       <section className="card">
-        <h2>Part 1: Results from week {cp.week}</h2>
-        <p className="muted">Only answers that were correct on the first try count. Finish any open areas in the week first.</p>
+        <h2>Part 1: Results from topic {cp.week}</h2>
+        <p className="muted">Only answers that were correct on the first try count. Finish any open areas in the topic first.</p>
         <table>
           <tbody>
             {AREAS.map((a, k) => (
@@ -62,13 +62,13 @@ export default function CheckpointPage({ cp, week, tasks, speakingKey, criteria,
           </tbody>
         </table>
         <p>
-          <Link href={`/woche/${cp.week}`}>Go to week {cp.week}</Link>
+          <Link href={`/woche/${cp.week}`}>Go to topic {cp.week}</Link>
         </p>
       </section>
 
       <section className="card">
         <h2>Part 2: Writing</h2>
-        {cp.writing ? null : <p className="muted">Checkpoint 3 uses the two writing tasks from week 12.</p>}
+        {cp.writing ? null : <p className="muted">Checkpoint 3 uses the two writing tasks from topic 12.</p>}
         {tasks.map((t) => (
           <WritingTask key={t.id} task={t} criteria={criteria} max={2} checklist={checklist} />
         ))}
@@ -81,7 +81,7 @@ export default function CheckpointPage({ cp, week, tasks, speakingKey, criteria,
             <InlineText segs={cp.speaking} />
           </p>
         ) : (
-          <p>Use your recording from week 12 (speaking parts 1–3) and compare it with your first recording.</p>
+          <p>Use your recording from topic 12 (speaking parts 1–3) and compare it with your first recording.</p>
         )}
         <Recorder />
         <Rubric
@@ -121,7 +121,7 @@ export default function CheckpointPage({ cp, week, tasks, speakingKey, criteria,
         <h2>What now?</h2>
         <p className={advice === "incomplete" ? "muted" : "feedback neutral"}>{ADVICE_TEXT[advice]}</p>
         {below.length ? <p>Below 60 %: {below.map((k) => AREAS[k]).join(", ")}</p> : null}
-        {canDo.some((v) => v === 1) ? <p>Statements rated "1": practise that situation as a role-play once next week.</p> : null}
+        {canDo.some((v) => v === 1) ? <p>Statements rated "1": revisit that situation as a role-play when you next practise.</p> : null}
         {cp.n === 3 && advice !== "incomplete" ? (
           <p>
             Next step: take the free official practice test under exam conditions (see <Link href="/material/hoeren-lesen">Listening and reading</Link>), then decide: exam or B1.
