@@ -2,7 +2,10 @@ import Head from "next/head";
 import type { GetServerSideProps } from "next";
 import { signIn } from "next-auth/react";
 import { useState } from "react";
-import { authConfigured } from "../src/server/auth.ts";
+import { getServerSession } from "next-auth/next";
+import { authConfigured, authOptions } from "../src/server/auth.ts";
+import type { CourseSession } from "../src/server/auth.ts";
+import { canAccess } from "../src/lib/access.ts";
 
 export default function SignIn({ configured, denied }: { configured: boolean; denied: boolean }) {
   const [pending, setPending] = useState(false);
@@ -30,7 +33,13 @@ export default function SignIn({ configured, denied }: { configured: boolean; de
   );
 }
 
-export const getServerSideProps: GetServerSideProps = ({ res, query }) => {
+export const getServerSideProps: GetServerSideProps = async ({ req, res, query }) => {
   res.setHeader("Cache-Control", "private, no-store, max-age=0");
-  return Promise.resolve({ props: { configured: authConfigured(), denied: typeof query.error === "string" } });
+  res.setHeader("Vary", "Cookie");
+  const configured = authConfigured();
+  const session = configured ? await getServerSession(req, res, authOptions) as CourseSession | null : null;
+  if (session?.accountKey && canAccess(session.user?.email, true, process.env.ALLOWED_EMAILS)) {
+    return { redirect: { destination: "/", permanent: false } };
+  }
+  return { props: { configured, denied: typeof query.error === "string" } };
 };
