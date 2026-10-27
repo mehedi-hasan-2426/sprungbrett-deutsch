@@ -27,6 +27,7 @@ export interface WritingRecord {
   text: string;
   score: number[];
   at: number;
+  submitted?: boolean;
 }
 
 export interface Progress {
@@ -111,7 +112,8 @@ export function validateProgress(x: unknown): Progress {
   }
   const writing = record(x.writing, "writing", (v, k) => {
     if (!isObject(v) || typeof v.text !== "string" || v.text.length > MAX_TEXT || !time(v.at)) fail("writing." + k + " is invalid");
-    return { text: v.text as string, score: scores(v.score, "writing." + k + ".score", k === "p-wr-1" ? 4 : 2), at: v.at as number };
+    if (v.submitted !== undefined && typeof v.submitted !== "boolean") fail("writing." + k + ".submitted is invalid");
+    return { text: v.text as string, score: scores(v.score, "writing." + k + ".score", k === "p-wr-1" ? 4 : 2), at: v.at as number, ...(typeof v.submitted === "boolean" ? { submitted: v.submitted } : {}) };
   }, 100);
   const speaking = record(x.speaking, "speaking", (v, k) => scores(v, "speaking." + k, 3), 100);
   const canDo = record(x.canDo, "canDo", (v, k) => scores(v, "canDo." + k, 3), 10);

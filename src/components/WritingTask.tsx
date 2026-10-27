@@ -1,4 +1,3 @@
-import { useState } from "react";
 import type { WritingTask as Task } from "../lib/types.ts";
 import { InlineText } from "./Blocks.tsx";
 import { Rubric } from "./Rubric.tsx";
@@ -13,16 +12,16 @@ export function wordCount(text: string): number {
 export function WritingTask({ task, criteria, max, checklist }: { task: Task; criteria: string[]; max: number; checklist: string[] }) {
   const { progress, update } = useProgress();
   const saved = progress.writing[task.id];
-  const [draft, setDraft] = useState<string | null>(null);
-  const text = draft ?? saved?.text ?? "";
-  const submitted = Boolean(saved) && draft === null;
+  const text = saved?.text ?? "";
+  const submitted = Boolean(saved) && saved?.submitted !== false;
   const words = wordCount(text);
   const inRange = words >= task.min && words <= task.max + 10;
 
   const submit = () => {
-    update((p) => ({ ...p, writing: { ...p.writing, [task.id]: { text: text.slice(0, MAX), score: p.writing[task.id]?.score ?? [], at: Date.now() } } }));
-    setDraft(null);
+    update((p) => ({ ...p, writing: { ...p.writing, [task.id]: { text: text.slice(0, MAX), score: p.writing[task.id]?.score ?? [], at: Date.now(), submitted: true } } }));
   };
+
+  const saveDraft = (value: string) => update((p) => ({ ...p, writing: { ...p.writing, [task.id]: { text: value.slice(0, MAX), score: [], at: Date.now(), submitted: false } } }));
 
   return (
     <div className="writing">
@@ -30,7 +29,7 @@ export function WritingTask({ task, criteria, max, checklist }: { task: Task; cr
         <InlineText segs={task.prompt} />
       </p>
       <label htmlFor={task.id}>Your text (in German)</label>
-      <textarea id={task.id} lang="de" rows={8} maxLength={MAX} value={text} readOnly={submitted} onChange={(e) => setDraft(e.target.value)} />
+      <textarea id={task.id} lang="de" rows={8} maxLength={MAX} value={text} readOnly={submitted} onChange={(e) => saveDraft(e.target.value)} />
       <p className={inRange ? "muted" : "muted warn"}>
         {words} words (target: {task.min}–{task.max})
       </p>
@@ -68,7 +67,7 @@ export function WritingTask({ task, criteria, max, checklist }: { task: Task; cr
               return prev ? { ...p, writing: { ...p.writing, [task.id]: { ...prev, score } } } : p;
             })}
           />
-          <button type="button" className="link" onClick={() => setDraft(text)}>
+          <button type="button" className="link" onClick={() => saveDraft(text)}>
             Write version 2 (improve it)
           </button>
         </>
