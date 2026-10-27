@@ -102,3 +102,14 @@ test("unconfigured or unavailable storage fails closed without deleting data", a
   assert.equal((await failed.invoke("PUT", { revision: 1, progress })).status, 503);
   assert.equal(failed.rows.get(first)?.revision, 1);
 });
+
+test("cloud progress refuses reserved object keys without mutating prototypes", async () => {
+  const api = fixture();
+  for (const key of ["constructor", "prototype", "__proto__"]) {
+    const progress = emptyProgress();
+    progress.items = Object.fromEntries([[key, { status: "solved", attempts: 1, firstTry: true, at: 1 }]]);
+    assert.equal((await api.invoke("PUT", { revision: 0, progress })).status, 400);
+  }
+  assert.equal(api.rows.size, 0);
+  assert.equal(Object.prototype.hasOwnProperty.call(Object.prototype, "status"), false);
+});

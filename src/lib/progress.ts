@@ -71,12 +71,12 @@ function record<T>(x: unknown, name: string, each: (v: unknown, key: string) => 
   if (!isObject(x)) fail(name + " must be an object");
   const keys = Object.keys(x);
   if (keys.length > limit) fail(name + " has too many entries");
-  const out: Record<string, T> = {};
+  const entries: [string, T][] = [];
   for (const key of keys) {
-    if (!ID.test(key)) fail(`${name}: invalid key "${key.slice(0, 40)}"`);
-    out[key] = each(x[key], key);
+    if (!ID.test(key) || key === "constructor" || key === "prototype" || key === "__proto__") fail(`${name}: invalid key "${key.slice(0, 40)}"`);
+    entries.push([key, each(x[key], key)]);
   }
-  return out;
+  return Object.fromEntries(entries);
 }
 
 function scores(x: unknown, name: string, max: number): number[] {
