@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { useState } from "react";
-import type { GetStaticProps } from "next";
+import { protect } from "../src/server/protect.ts";
 import { Layout } from "../src/components/Layout.tsx";
 import { loadCourse, weekSummaries } from "../src/server/load.ts";
 import { currentWeek, ROLE_LABEL } from "../src/lib/weeks.ts";
@@ -108,7 +108,7 @@ export default function Home({ weeks, placementIds, roleOrder }: Props) {
   );
 }
 
-export const getStaticProps: GetStaticProps<Props> = () => {
+export const getServerSideProps = protect<Props>(() => {
   const course = loadCourse();
   return {
     props: {
@@ -117,4 +117,4 @@ export const getStaticProps: GetStaticProps<Props> = () => {
       roleOrder: ["exercises", "retrieval", "reading", "pronunciation", "quiz"],
     },
   };
-};
+});

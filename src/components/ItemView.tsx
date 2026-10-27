@@ -58,6 +58,7 @@ export function ItemView({ item }: { item: Item }) {
   const done = state.status === "solved" || state.status === "revealed";
   const label = `Exercise ${item.group} ${item.n}`;
   const cat = CATEGORIES[item.tag];
+  const difficulty = item.difficulty ? <span className="exercise-level" lang="en">{item.difficulty}</span> : null;
 
   const answer = (ok: boolean, submitted = values) => {
     const next = step(state, ok);
@@ -134,7 +135,7 @@ export function ItemView({ item }: { item: Item }) {
     return (
       <fieldset className="item" aria-describedby={id}>
         <legend>
-          <span className="num">{item.n}.</span> <InlineText segs={parseInline(item.prompt)} />
+          {difficulty} <span className="num">{item.n}.</span> <InlineText segs={parseInline(item.prompt)} />
         </legend>
         <div className="options">
           {item.options?.map((o) => (
@@ -155,7 +156,7 @@ export function ItemView({ item }: { item: Item }) {
     return (
       <div className="item">
         <p className="prompt pre">
-          <span className="num">{item.n}.</span> <InlineText segs={parseInline(item.prompt)} />
+          {difficulty} <span className="num">{item.n}.</span> <InlineText segs={parseInline(item.prompt)} />
         </p>
         {!done ? (
           <>
@@ -191,7 +192,7 @@ export function ItemView({ item }: { item: Item }) {
   return (
     <form className="item" onSubmit={submit} aria-describedby={id}>
       <p>
-        <span className="num">{item.n}.</span>{" "}
+        {difficulty} <span className="num">{item.n}.</span>{" "}
         <Prompt text={item.prompt} blanks={item.blanks} values={values} setValue={setValue} disabled={done} label={label} />
       </p>
       {item.blanks === 0 ? (

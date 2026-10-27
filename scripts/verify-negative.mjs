@@ -16,6 +16,7 @@ const mutations = [
   ["no learner personal data in repository content", (d) => writeFileSync(join(d, "content", "source", "leak.md"), "Hallo " + "Ti" + "sha\n")],
   ["dependencies are pinned and minimal", (d) => edit(d, "package.json", (s) => s.replace('"next":', '"left-pad": "^1.3.0",\n    "next":'))],
   ["workflows pin actions and restrict tokens", (d) => edit(d, ".github/workflows/ci.yml", (s) => s.replace(/actions\/checkout@[0-9a-f]{40}/, "actions/checkout@v5"))],
+  ["course routes require server-side authorization", (d) => edit(d, "pages/karten.tsx", (s) => s.replace("export const getServerSideProps = protect", "export const getServerSideProps = unprotected"))],
   ["no committed secrets", (d) => writeFileSync(join(d, "src", "leak.ts"), `export const t = "${"gh" + "p_" + "a".repeat(36)}";\n`)],
 ];
 

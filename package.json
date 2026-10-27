@@ -12,6 +12,7 @@
     "content": "node --experimental-strip-types --no-warnings scripts/build-content.ts",
     "predev": "npm run content",
     "dev": "next dev --webpack",
+    "start": "next start --hostname 127.0.0.1",
     "prebuild": "npm run content",
     "build": "next build --webpack",
     "postbuild": "node scripts/check-output.mjs",
@@ -24,6 +25,7 @@
   },
   "dependencies": {
     "next": "16.4.3",
+    "next-auth": "4.24.15",
     "react": "19.3.1",
     "react-dom": "19.3.1"
   },

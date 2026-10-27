@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { GetStaticPaths, GetStaticProps } from "next";
+import { protect } from "../../../src/server/protect.ts";
 import type { Unit } from "../../../src/lib/types.ts";
 import { Layout } from "../../../src/components/Layout.tsx";
 import { Blocks, InlineText } from "../../../src/components/Blocks.tsx";
@@ -86,12 +86,7 @@ export default function WeekPage({ n, title, intro, shortDay, lessons, checkpoin
   );
 }
 
-export const getStaticPaths: GetStaticPaths = () => ({
-  paths: Array.from({ length: 12 }, (_, k) => ({ params: { n: String(k + 1) } })),
-  fallback: false,
-});
-
-export const getStaticProps: GetStaticProps<Props> = ({ params }) => {
+export const getServerSideProps = protect<Props>(({ params }) => {
   const course = loadCourse();
   const n = Number(params?.n);
   const unit = course.weeks[n - 1];
@@ -104,4 +99,4 @@ export const getStaticProps: GetStaticProps<Props> = ({ params }) => {
     itemIds: s.role === "listening" ? [] : s.blocks.flatMap((b) => (b.kind === "item" ? [b.itemId] : [])),
   }));
   return { props: { n, title: unit.title, intro: unit.intro, shortDay: unit.shortDay, lessons, checkpoint } };
-};
+});

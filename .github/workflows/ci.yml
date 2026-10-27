@@ -56,6 +56,9 @@ jobs:
       - name: Build and scan output for CSP violations
         run: npm run build
 
+      - name: Production server access boundaries
+        run: node scripts/test-server.mjs
+
   secrets:
     name: secret scan
     runs-on: ubuntu-latest

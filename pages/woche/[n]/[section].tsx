@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { GetStaticPaths, GetStaticProps } from "next";
+import { protect } from "../../../src/server/protect.ts";
 import type { Section, Unit } from "../../../src/lib/types.ts";
 import { Layout } from "../../../src/components/Layout.tsx";
 import { SectionView } from "../../../src/components/SectionView.tsx";
@@ -38,7 +38,7 @@ export default function LessonPage({ n, unit, section, rubric, prev, next, index
           <p className="eyebrow">Week {n} · Lesson {index + 1} of {total}</p>
           <h1>{title}</h1>
           <div className={`lesson-content role-${section.role}`}>
-            <SectionView unit={unit} section={section} rubric={rubric} idPrefix="h" />
+            <SectionView key={`${unit.id}-${section.id}`} unit={unit} section={section} rubric={rubric} idPrefix="h" />
           </div>
           <nav className="pager" aria-label="Lessons">
             {prev ? <Link href={prev.href}>← {prev.label}</Link> : <span />}
@@ -62,12 +62,7 @@ export default function LessonPage({ n, unit, section, rubric, prev, next, index
   );
 }
 
-export const getStaticPaths: GetStaticPaths = () => ({
-  paths: loadCourse().weeks.flatMap((w, k) => w.sections.map((s) => ({ params: { n: String(k + 1), section: s.id } }))),
-  fallback: false,
-});
-
-export const getStaticProps: GetStaticProps<Props> = ({ params }) => {
+export const getServerSideProps = protect<Props>(({ params }) => {
   const course = loadCourse();
   const n = Number(params?.n);
   const unit = course.weeks[n - 1];
@@ -86,4 +81,4 @@ export const getStaticProps: GetStaticProps<Props> = ({ params }) => {
   return {
     props: { n, unit, section, rubric: { criteria: course.rubric.writing, max: 2, checklist: course.rubric.checklist }, prev, next, index, total: unit.sections.length },
   };
-};
+});

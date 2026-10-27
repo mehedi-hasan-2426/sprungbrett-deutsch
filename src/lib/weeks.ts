@@ -6,6 +6,7 @@ export interface WeekSummary {
   title: string;
   ids: Record<string, string[]>;
   writing: string[];
+  practice?: Record<string, string[]>;
 }
 
 export interface NavWeek {

@@ -137,7 +137,7 @@ export function validateProgress(x: unknown): Progress {
 }
 
 export function parseImport(text: string): Progress {
-  if (text.length > MAX_IMPORT_BYTES) fail("file is too large");
+  if (text.length > MAX_IMPORT_BYTES || new TextEncoder().encode(text).byteLength > MAX_IMPORT_BYTES) fail("file is too large");
   let data: unknown;
   try {
     data = JSON.parse(text);
@@ -147,22 +147,38 @@ export function parseImport(text: string): Progress {
   return validateProgress(data);
 }
 
-export function load(storage: Pick<Storage, "getItem"> | undefined): Progress {
+export function progressStorageKey(accountKey: string): string {
+  if (!/^[a-f0-9]{64}$/.test(accountKey)) fail("invalid account storage key");
+  return `${STORAGE_KEY}.${accountKey}`;
+}
+
+export function load(storage: Pick<Storage, "getItem"> | undefined, key = STORAGE_KEY): Progress {
   try {
-    const raw = storage?.getItem(STORAGE_KEY);
+    const raw = storage?.getItem(key);
     return raw ? parseImport(raw) : emptyProgress();
   } catch {
     return emptyProgress();
   }
 }
 
-export function save(storage: Pick<Storage, "setItem"> | undefined, progress: Progress): boolean {
+export function save(storage: Pick<Storage, "setItem"> | undefined, progress: Progress, key = STORAGE_KEY): boolean {
   try {
-    storage?.setItem(STORAGE_KEY, JSON.stringify(progress));
+    if (!storage) return false;
+    storage.setItem(key, JSON.stringify(progress));
     return true;
   } catch {
     return false;
   }
+}
+
+export function claimLegacyProgress(storage: Pick<Storage, "getItem" | "setItem" | "removeItem"> | undefined, accountKey: string): Progress {
+  const key = progressStorageKey(accountKey);
+  const raw = storage?.getItem(STORAGE_KEY);
+  if (!raw) fail("No previous anonymous progress is available.");
+  const progress = parseImport(raw);
+  if (!save(storage, progress, key)) fail("Progress could not be saved. The previous data has been kept.");
+  storage?.removeItem(STORAGE_KEY);
+  return progress;
 }
 
 export function markDay(p: Progress, day: string): Progress {

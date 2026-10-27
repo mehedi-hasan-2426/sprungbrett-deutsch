@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { GetStaticProps } from "next";
+import { protect } from "../src/server/protect.ts";
 import { Layout } from "../src/components/Layout.tsx";
 import { loadCourse } from "../src/server/load.ts";
 import type { VocabEntry } from "../src/lib/types.ts";
@@ -88,8 +88,10 @@ export default function Cards({ vocab }: Props) {
             <>
               <div className="back" lang="de">
                 <p className="big">{current.term}</p>
+                <p lang="en"><strong>{current.meaning}</strong></p>
                 {current.forms ? <p>{current.forms}</p> : null}
                 {current.example ? <p className="muted">{current.example}</p> : null}
+                <p className="muted" lang="en">{current.exampleEn}</p>
               </div>
               <div className="row">
                 <button type="button" onClick={() => grade(true)}>
@@ -117,4 +119,4 @@ export default function Cards({ vocab }: Props) {
   );
 }
 
-export const getStaticProps: GetStaticProps<Props> = () => ({ props: { vocab: loadCourse().vocab } });
+export const getServerSideProps = protect<Props>(() => ({ props: { vocab: loadCourse().vocab } }));

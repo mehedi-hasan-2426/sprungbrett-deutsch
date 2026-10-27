@@ -78,7 +78,7 @@ export const checks = [
   ["dependencies are pinned and minimal", () => {
     const pkg = JSON.parse(read("package.json"));
     const runtime = Object.keys(pkg.dependencies ?? {});
-    assert(runtime.sort().join(",") === "next,react,react-dom", "unexpected runtime dependency: " + runtime.join(","));
+    assert(runtime.sort().join(",") === "next,next-auth,react,react-dom", "unexpected runtime dependency: " + runtime.join(","));
     for (const [name, version] of Object.entries({ ...pkg.dependencies, ...pkg.devDependencies })) {
       assert(/^\d+\.\d+\.\d+$/.test(version), `${name} must be pinned to an exact version, found ${version}`);
     }
@@ -96,6 +96,20 @@ export const checks = [
       if (/actions\/checkout/.test(body)) assert(/persist-credentials: false/.test(body), "checkout must not persist credentials: " + f);
     }
     return files.length + " workflows";
+  }],
+  ["course routes require server-side authorization", () => {
+    const config = read("next.config.ts");
+    assert(!/output:\s*["']export["']/.test(config), "static export would publish protected lessons");
+    for (const file of walk(join(ROOT, "pages")).filter((file) => file.endsWith(".tsx"))) {
+      const name = file.split(/[\\/]/).pop();
+      if (name.startsWith("_") || ["signin.tsx", "404.tsx", "500.tsx"].includes(name)) continue;
+      const body = readFileSync(file, "utf8");
+      assert(/export const getServerSideProps = protect\(/.test(body) || /export const getServerSideProps = protect</.test(body), "unprotected course route: " + file);
+      assert(!/getStaticProps|getStaticPaths/.test(body), "static course route: " + file);
+    }
+    const protect = read("src", "server", "protect.ts");
+    assert(/getServerSession/.test(protect) && /canAccess/.test(protect) && /private, no-store/.test(protect), "server authorization or private caching missing");
+    return "request-time checks; no static course pages";
   }],
   ["no committed secrets", () => {
     const patterns = [/AKIA[0-9A-Z]{16}/, /-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----/, /gh[pousr]_[A-Za-z0-9]{20,}/, /xox[baprs]-[A-Za-z0-9-]{10,}/, /sk-[A-Za-z0-9]{20,}/];
