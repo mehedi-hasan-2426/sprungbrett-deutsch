@@ -2,7 +2,6 @@ import assert from "node:assert/strict";
 import { Buffer } from "node:buffer";
 import { setTimeout, clearTimeout } from "node:timers";
 import { randomBytes } from "node:crypto";
-import { readFileSync } from "node:fs";
 import { createServer } from "node:net";
 import { createServer as createHttpServer } from "node:http";
 import { spawn } from "node:child_process";
@@ -50,10 +49,13 @@ try {
     child.once("error", (error) => { clearTimeout(timer); reject(error); });
     child.once("exit", (code) => { clearTimeout(timer); reject(new Error(`Production server exited: ${code}`)); });
   });
-  const buildId = readFileSync(join(root, ".next/BUILD_ID"), "utf8").trim();
-  const course = JSON.parse(readFileSync(join(root, "content/generated/course.json"), "utf8"));
-  const reading = course.weeks[0].sections.find((section) => section.role === "reading");
-  const vocab = course.weeks[0].sections.find((section) => section.role === "vocab");
+  const signInHtml = await (await fetch(origin + "/signin")).text();
+  const bootstrap = signInHtml.match(/<script[^>]*id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/)?.[1];
+  assert.ok(bootstrap, "Sign-in page has no Next bootstrap data");
+  const { buildId } = JSON.parse(bootstrap);
+  assert.match(buildId, /^[A-Za-z0-9_-]{1,128}$/);
+  const reading = { id: "5-lesen" };
+  const vocab = { id: "1-wortschatz" };
   const routes = ["/", "/karten", "/fortschritt", "/info", "/plan", "/einstufung", "/artikel", "/kurz", "/checkpoint/1", "/material/wortschatz", "/woche/1", `/woche/1/${reading.id}`, `/_next/data/${buildId}/woche/1.json`, `/_next/data/${buildId}/woche/1/${reading.id}.json`];
   const cookie = async (overrides = {}) => {
     const token = await encode({ secret, maxAge: 8 * 60 * 60, token: { sub: "synthetic-first", email: "first@example.com", provider: "google", verified: true, signedInAt: Date.now(), ...overrides } });

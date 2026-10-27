@@ -6,11 +6,24 @@ export function blockingFindings(report) {
   if (!Array.isArray(report.runs) || report.runs.length === 0) throw new Error("Missing CodeQL analysis runs");
   const findings = [];
   for (const run of report.runs) {
-    const rules = run.tool?.driver?.rules ?? [];
+    const driver = run.tool?.driver;
+    const extensions = run.tool?.extensions ?? [];
     for (const result of run.results ?? []) {
-      const rule = rules.find((entry) => entry.id === result.ruleId) ?? rules[result.ruleIndex];
+      const reference = result.rule;
+      const component = reference?.toolComponent;
+      const components = component
+        ? extensions.filter((entry, index) => component.index !== undefined ? index === component.index : component.guid ? entry.guid === component.guid : entry.name === component.name)
+        : [driver, ...extensions].filter(Boolean);
+      const id = reference?.id ?? result.ruleId;
+      const index = reference?.index ?? result.ruleIndex;
+      const matches = id
+        ? components.flatMap((entry) => (entry.rules ?? []).filter((rule) => rule.id === id))
+        : components.flatMap((entry) => entry.rules?.[index] ? [entry.rules[index]] : []);
+      if (matches.length !== 1) throw new Error("CodeQL result has no unique rule metadata");
+      const rule = matches[0];
       if (!rule) throw new Error("CodeQL result has no rule metadata");
       const severity = Number(rule.properties?.["security-severity"] ?? 0);
+      if (!Number.isFinite(severity) || severity < 0 || severity > 10) throw new Error("Invalid CodeQL security severity");
       if (severity >= 7) findings.push({ rule: rule.id, severity });
     }
   }
