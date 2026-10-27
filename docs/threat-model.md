@@ -1,6 +1,7 @@
 # Threat model
 
-Covers authenticated server-rendered access, the content pipeline and local progress.
+Covers authenticated server-rendered access, the content pipeline and account progress
+in Neon Postgres with a local browser cache.
 Method is STRIDE over the data flow below.
 
 ## Data flow
@@ -15,6 +16,8 @@ flowchart LR
     B -->|check-output.mjs| R
     R -->|HTTPS; private no-store| BR[Browser]
     BR <-->|account-specific progress JSON| LS[(localStorage)]
+    BR <-->|same-origin validated requests| P[Progress API: session owner and revision]
+    P <-->|parameterized SQL over HTTPS| DB[(Private Neon Postgres)]
     BR -->|explicit export / import| F[JSON file]
     BR -->|getUserMedia after click| M[Microphone, blob: URL only]
 ```
@@ -23,6 +26,8 @@ Trust boundaries: private notes to repository (personal data), build machine to 
 (published artefacts), host to browser (executed as script), file import to app
 (untrusted JSON), Google identity to server session, and account changes within
 one browser profile. Listening remains coming soon, not scored.
+The progress API to database boundary holds server-only credentials. No browser
+claim can select another owner. Provider administrators remain trusted operators.
 
 ## Spoofing
 
@@ -65,7 +70,8 @@ The learner profile, start note and personal logs are never copied into the
 repository (`sync-source.mjs` uses an allowlist) and the learner's name is replaced.
 `verify` and `check-output.mjs` fail if the name appears in source or build output.
 
-Progress stays in account-specific `localStorage` keys. Anonymous data is assigned
+Progress syncs through the private server API and remains cached in account-specific
+`localStorage` keys. Anonymous data is assigned
 only after confirmation and the original is retained if saving fails. Recordings
 stay in memory and are discarded when the
 tab closes. `Referrer-Policy: no-referrer` and `rel="noopener noreferrer"` prevent
@@ -79,6 +85,20 @@ Login cannot retract content from the public Git repository, earlier deployments
 copies already retrieved. Separate browser profiles are needed to prevent another
 person with browser-profile access from inspecting local progress.
 
+Each database row is selected by the authenticated account key, never by submitted
+email or user ID. GET/PUT responses are private and no-store. PUT requires the
+canonical Origin and a custom request header; cross-site requests are denied.
+Imports and cloud saves use the same validated progress schema and bounded size.
+SQL uses tagged parameters, and revision conditions prevent stale writes and
+competing initial saves from overwriting data. Explicit conflict resolution keeps
+the other copy in local recovery storage; failures never delete the device copy.
+
+The Neon table has no PUBLIC grants and has RLS enabled. The managed owner
+connection can bypass RLS; account isolation depends on server API checks, not a
+misrepresented RLS guarantee. Cloud progress is not end-to-end encrypted against
+operators. Preview connections are removed and their old database secrets revoked
+before use. The adapter also refuses non-production Vercel environments.
+
 ## Denial of service
 
 Server rendering and Google identity are availability dependencies. Infrastructure
@@ -86,6 +106,11 @@ rate limiting and denial-of-service mitigation remain hosting responsibilities;
 no claim is made that this app supplies them. Import size is capped. Stored lists (mistakes, study
 days) are bounded so `localStorage` cannot grow without limit; a failing write shows a
 warning instead of crashing.
+Database fetches have bounded timeouts. Client saves are debounced and serialized;
+network failure stops automatic looping until another edit, focus/online event or
+explicit retry. Free-plan limits can make cloud sync unavailable; local copies and
+independent exports remain necessary. Infrastructure-wide rate limiting is not
+claimed for the two-user authenticated API.
 
 ## Elevation of privilege
 
@@ -134,7 +159,8 @@ It must not be used to deploy the authenticated application; use the Next server
 | No HTML injection, `eval` or inline styles in source | XSS, CSP bypass |
 | Links allowlisted to `https:` or internal routes | Script-scheme injection |
 | No learner name or personal files in content or output | Personal data disclosure |
-| Exact dependency pins, four runtime packages, lockfile | Supply chain drift |
+| Exact dependency pins, five runtime packages, lockfile | Supply chain drift |
+| Session-owned SQL, origin checks, atomic revisions | Cross-account writes, CSRF, lost updates |
 | Request-time guards, no static course data, private caching | Unauthorized course access |
 | Account storage namespaces and confirmed migration | Accidental progress mixing |
 | Actions pinned to SHAs, read-only token | CI compromise |
@@ -148,6 +174,7 @@ each static check actually fails, so the suite cannot silently become a no-op.
 
 Relevant controls: OWASP Top 10 A01, A02, A03, A05, A06, A08.
 
-Revisit when changing identity providers, introducing cloud progress, AI feedback,
-speech recognition, or another runtime dependency. No SQL or cloud-provisioning
-boundary is introduced by this change.
+Revisit when changing identity providers, introducing AI feedback, speech recognition,
+another runtime dependency, or a more sophisticated data-merge/revocation model.
+The new SQL boundary is covered by API/adapter tests and a live synthetic revision
+check; synthetic tests do not prove every future database configuration safe.

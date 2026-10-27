@@ -35,7 +35,7 @@ export default function Home({ weeks, placementIds, roleOrder }: Props) {
   return (
     <Layout>
       <h1>Today</h1>
-      <p className="muted">Your plan for today. Everything is saved only in this browser.</p>
+      <p className="muted">Your plan for today. Check the save status above before switching devices.</p>
       {!ready ? <p className="muted">Loading progress …</p> : null}
       <div className="grid">
         {placement.done < placement.total ? (

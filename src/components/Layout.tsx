@@ -5,6 +5,12 @@ import type { ReactNode } from "react";
 import { useProgress } from "../state/ProgressContext.tsx";
 import { Sidebar } from "./Sidebar.tsx";
 import { signOut } from "next-auth/react";
+import { useState } from "react";
+
+const SYNC_LABEL = {
+  loading: "Loading progress...", pending: "Save pending", saving: "Saving...",
+  saved: "Saved to cloud", offline: "Cloud unavailable", conflict: "Progress conflict",
+};
 
 const NAV = [
   { href: "/", label: "Today" },
@@ -17,7 +23,24 @@ const NAV = [
 
 export function Layout({ children, title }: { children: ReactNode; title?: string }) {
   const { pathname } = useRouter();
-  const { saved, ready } = useProgress();
+  const { saved, ready, syncStatus, syncNow, cacheInvalid } = useProgress();
+  const [leaving, setLeaving] = useState(false);
+  const [logoutError, setLogoutError] = useState(false);
+  const leave = async () => {
+    setLeaving(true);
+    setLogoutError(false);
+    try {
+      const synced = await syncNow();
+      if (!synced && !window.confirm("Cloud sync is not complete. Progress may still be only on this device. Sign out anyway?")) {
+        setLeaving(false);
+        return;
+      }
+      await signOut({ callbackUrl: "/signin" });
+    } catch {
+      setLogoutError(true);
+      setLeaving(false);
+    }
+  };
   return (
     <>
       <Head>
@@ -37,8 +60,14 @@ export function Layout({ children, title }: { children: ReactNode; title?: strin
             </Link>
           ))}
         </nav>
-        <button type="button" className="link" onClick={() => signOut({ callbackUrl: "/signin" })}>Sign out</button>
+        <div className="account-actions">
+          <Link className="save-state" href="/fortschritt" aria-live="polite">{SYNC_LABEL[syncStatus]}</Link>
+          <button type="button" className="link" onClick={leave} disabled={leaving}>{leaving ? "Signing out..." : "Sign out"}</button>
+        </div>
       </header>
+      {logoutError ? <p className="feedback bad banner" role="alert">Sign-out failed. Please try again; your progress has not been deleted.</p> : null}
+      {cacheInvalid ? <p className="feedback bad banner" role="alert">This device's saved progress could not be validated. Cloud sync is paused to protect it. Import a trusted backup on Progress, or recover the cloud copy from another browser.</p> : null}
+      {syncStatus === "conflict" ? <p className="feedback hint banner" role="alert">Progress changed on another device. Both copies are kept. <Link href="/fortschritt">Choose which copy to continue.</Link></p> : null}
       {ready && !saved ? (
         <p className="feedback bad banner" role="alert">
           Your progress can't be saved in this browser (private mode or storage full). Export it on the Progress page.
@@ -50,7 +79,7 @@ export function Layout({ children, title }: { children: ReactNode; title?: strin
       </div>
       <footer>
         <p>
-          Progress stays in this browser, separated by Google account. No learning data is uploaded. <Link href="/info">Privacy and licences</Link>
+          Progress syncs privately to your account; this device keeps a local copy. <Link href="/info">Privacy and licences</Link>
         </p>
       </footer>
     </>

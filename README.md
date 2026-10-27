@@ -3,8 +3,8 @@
 A privacy-first web app for practising German from A1 to A2, with instant feedback.
 It turns a 12-week course (placement test, weekly modules, checkpoints) into
 interactive exercises. Course access requires one of exactly two approved Google
-accounts. Learning progress stays in this browser, separated by account; no
-learning data is uploaded and there is no analytics or progress database.
+accounts. Learning progress syncs privately to Neon Postgres, separated by account,
+with a local browser copy for interrupted connections. No analytics are used.
 
 Navigation, explanations and hints are in **English**. Reading and writing tasks
 and their instructions are in **German**. Every vocabulary entry has an English
@@ -40,6 +40,8 @@ meaning, forms, and an original German example with an English translation.
 - **Writing**: word counter, checklist, model text unlocked after submitting, rubric.
 - **Checkpoints** after weeks 4, 8 and 12 with the course's adjustment rules.
 - **Short day** mode (15 minutes), study streak, JSON export and import.
+- **Account progress sync**: debounced automatic saves, offline local copies, an
+   explicit device/cloud choice on conflicts, and a recoverable copy before replacement.
 
 ## Run locally
 
@@ -102,7 +104,7 @@ request; no static course export or publicly bundled lesson data. Google sign-in
 requires verified email and an exact server-side two-address allowlist. Sessions
 use encrypted HTTP-only cookies, PKCE/state/nonce checks and an eight-hour absolute
 maximum. Strict CSP (`default-src 'none'`, `script-src 'self'`, `style-src 'self'`,
-no `unsafe-*`), no HTML injection, validated imports, four pinned runtime dependencies,
+no `unsafe-*`), no HTML injection, validated imports, five pinned runtime dependencies,
 SHA-pinned CI actions, CodeQL and gitleaks. The project builds with `--webpack` because
 Next.js 16's default Turbopack output contains an inline bootstrap script that a strict
 CSP would block. See [SECURITY.md](SECURITY.md) and
@@ -127,6 +129,7 @@ CSP would block. See [SECURITY.md](SECURITY.md) and
    | `GOOGLE_CLIENT_ID` | OAuth client ID |
    | `GOOGLE_CLIENT_SECRET` | OAuth client secret |
    | `ALLOWED_EMAILS` | Exactly two distinct comma-separated Google-account emails |
+   | `DATABASE_URL` | Server-only Neon pooled connection string, Production only |
 
    Store both secrets using Vercel's Secret type. No variable uses `NEXT_PUBLIC_`.
    Environment changes apply to new deployments. Use a separate OAuth client and
@@ -145,6 +148,45 @@ old copy is removed only after saving. Export before replacing account progress.
 Shared browser profiles can inspect local storage; use separate profiles when
 privacy between people using the same machine matters. Login does not erase source
 already published in this public repository or copies from earlier deployments.
+
+## Progress Storage
+
+Create a Neon **Free** database through Vercel Marketplace and connect only the
+Production environment. Keep optional Neon Auth, Realtime and deployment branching
+off. Existing Google authentication remains the identity boundary. Check the actual
+Free plan before accepting it; no paid upgrade or add-on is needed for two users.
+
+Apply the statements in `scripts/progress-schema.sql` using the database's query
+editor. Vercel's prepared-statement editor requires running each statement
+separately. The migration creates only `public.sprungbrett_progress`, revokes public
+table grants, and enables row security. The managed database owner may bypass RLS;
+per-user isolation is enforced by the authenticated server API, not by pretending
+owner connections are subject to user-specific RLS policies.
+
+`GET /api/progress` selects only the signed-in account. `PUT /api/progress` accepts
+validated `{revision, progress}` with a same-origin request and custom request
+header. Identity is never accepted from request data. SQL uses driver parameters;
+an atomic revision comparison returns HTTP 409 instead of overwriting newer work.
+Preview deployments cannot activate this storage adapter, even if credentials were
+mistakenly configured. Keep production credentials out of Preview regardless.
+
+The first device can seed an empty account record from its existing validated local
+progress. A new device loads cloud progress. Concurrent, offline, or imported copies
+that disagree with changed cloud data require a choice on Progress; the other copy
+is retained under an account-specific recovery key before replacement. Sign-out
+tries to flush queued changes and asks before leaving if sync has not finished.
+The save indicator distinguishes cloud success from local-only availability.
+
+Resets replace the current cloud record with an empty progress snapshot; they do not
+erase exports, recovery files or provider historical backups. No recording is
+uploaded. Learning text is protected in transit and by server access checks, not
+end-to-end encrypted against the hosting/database operator. Keep independent exports
+and monitor the provider's free quotas. If a quota or network failure blocks cloud
+saves, local progress is kept and sync reports failure instead of claiming success.
+
+After changing integration scope, previous deployments still retain old credentials.
+Rotate the Neon resource secrets and redeploy Production to revoke such access.
+Never expose or log connection values. Do not rotate unrelated Google/session secrets.
 
 ## Licence
 

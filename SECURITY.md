@@ -26,15 +26,23 @@ Out of scope:
 ## Security properties
 
 Sprungbrett uses Next.js request-time rendering and NextAuth's Google provider.
-There is no progress database, no analytics and no third-party browser scripts.
+Progress is stored in private Neon Postgres records. There is no analytics and no
+third-party browser scripts.
 Google handles sign-in; the application checks verified email against exactly two
 configured addresses on sign-in and on every protected page/data request. Missing
 or invalid configuration denies access. Course responses are private and no-store.
 
-- Learner progress, written texts and self-ratings stay in the browser's
-  `localStorage`, namespaced by a hash of the provider subject. They leave the
-  device only when the learner exports a file. Legacy progress requires explicit
-  migration confirmation and is kept if the new save fails.
+- Learner progress, written texts and self-ratings sync over HTTPS through an
+  authenticated API; a browser copy is namespaced by a hash of the provider subject.
+  Legacy anonymous progress requires explicit migration confirmation.
+- Progress ownership comes only from the verified server session. Saves require
+  same-origin requests, schema/size validation and atomic revisions. Stale writes
+  return a conflict, not a silent overwrite. The unselected conflict copy is backed
+  up locally before resolution. Failed cloud saves preserve the device copy.
+- SQL is parameterized, database credentials and the driver stay server-only, and
+  previews cannot activate the adapter. Public table grants are revoked and RLS is
+  enabled; the managed owner can bypass RLS, so API ownership enforcement remains
+  mandatory. Hosting/database administrators are not excluded by end-to-end encryption.
 - Imported progress files are size-capped and validated against a strict schema;
   unknown versions, malformed keys and oversized fields are rejected.
 - Voice recordings exist only as in-memory `blob:` URLs in the open tab. They are
@@ -44,7 +52,7 @@ or invalid configuration denies access. Course responses are private and no-stor
 - The deployed Content Security Policy is `default-src 'none'` with
   `script-src 'self'` and `style-src 'self'`, without `unsafe-inline` or
   `unsafe-eval`. The build fails if the generated HTML would need either.
-- Runtime dependencies are limited to `next`, `next-auth`, `react` and `react-dom`, pinned to
+- Runtime dependencies are limited to `@neondatabase/serverless`, `next`, `next-auth`, `react` and `react-dom`, pinned to
   exact versions with a committed lockfile.
 - Authentication uses encrypted HTTP-only session cookies, secure on production
   HTTPS, with an absolute eight-hour maximum. Provider access tokens and secrets
@@ -53,6 +61,9 @@ or invalid configuration denies access. Course responses are private and no-stor
 - Build checks reject prerendered course pages and lesson examples in public
   browser bundles. No generated course download is exposed. Previously public
   repository history and old deployments are not made confidential by this change.
+- Scope changes do not revoke credentials baked into old deployments. Rotate only
+  the database resource secrets after removing Preview and deploy the replacement
+  Production build. Resetting progress does not erase exports or provider backups.
 
 ## Verification
 

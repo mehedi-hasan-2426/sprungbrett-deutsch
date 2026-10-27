@@ -78,7 +78,7 @@ export const checks = [
   ["dependencies are pinned and minimal", () => {
     const pkg = JSON.parse(read("package.json"));
     const runtime = Object.keys(pkg.dependencies ?? {});
-    assert(runtime.sort().join(",") === "next,next-auth,react,react-dom", "unexpected runtime dependency: " + runtime.join(","));
+    assert(runtime.sort().join(",") === "@neondatabase/serverless,next,next-auth,react,react-dom", "unexpected runtime dependency: " + runtime.join(","));
     for (const [name, version] of Object.entries({ ...pkg.dependencies, ...pkg.devDependencies })) {
       assert(/^\d+\.\d+\.\d+$/.test(version), `${name} must be pinned to an exact version, found ${version}`);
     }
@@ -110,6 +110,20 @@ export const checks = [
     const protect = read("src", "server", "protect.ts");
     assert(/getServerSession/.test(protect) && /canAccess/.test(protect) && /private, no-store/.test(protect), "server authorization or private caching missing");
     return "request-time checks; no static course pages";
+  }],
+  ["cloud progress is authenticated and versioned", () => {
+    const route = read("pages", "api", "progress.ts");
+    assert(/getServerSession/.test(route) && /canAccess/.test(route) && /sizeLimit: "1mb"/.test(route), "progress authorization or size limit missing");
+    const api = read("src", "server", "progress-api.ts");
+    assert(/x-sprungbrett-sync/.test(api) && /request\.headers\.origin !== dependencies\.origin\(\)/.test(api) && /private, no-store/.test(api), "progress origin or private-cache protection missing");
+    const store = read("src", "server", "progress-store.ts");
+    assert(store.includes('WHERE account_key = ${accountKey} AND revision = ${revision}'), "progress ownership/version condition missing");
+    assert(/process\.env\.VERCEL_ENV !== "production"/.test(store) && !/sql\.unsafe/.test(store), "preview isolation or parameterized queries missing");
+    for (const file of [...walk(join(ROOT, "src", "components")), ...walk(join(ROOT, "src", "state"))]) {
+      const body = readFileSync(file, "utf8");
+      assert(!/DATABASE_URL|@neondatabase\/serverless/.test(body), "database credentials or driver in browser code: " + file);
+    }
+    return "session ownership, origin, revision and server-only SQL";
   }],
   ["no committed secrets", () => {
     const patterns = [/AKIA[0-9A-Z]{16}/, /-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----/, /gh[pousr]_[A-Za-z0-9]{20,}/, /xox[baprs]-[A-Za-z0-9-]{10,}/, /sk-[A-Za-z0-9]{20,}/];
