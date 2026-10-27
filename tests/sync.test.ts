@@ -120,3 +120,14 @@ test("closed controllers never apply a late response to another account", async 
   assert.equal(await pending, false);
   assert.deepEqual(fixture.local(), emptyProgress());
 });
+
+test("unfinished writing round-trips without unlocking submission and legacy records remain compatible", () => {
+  const progress = emptyProgress();
+  progress.writing["w1-wr-1"] = { text: "Liebe Eva, ich arbeite heute.", score: [], at: 1, submitted: false };
+  const snapshot = parseSnapshot({ revision: 1, progress });
+  assert.equal(snapshot.progress?.writing["w1-wr-1"]?.submitted, false);
+  assert.equal(snapshot.progress?.writing["w1-wr-1"]?.text, "Liebe Eva, ich arbeite heute.");
+  delete progress.writing["w1-wr-1"]?.submitted;
+  assert.equal(parseSnapshot({ revision: 2, progress }).progress?.writing["w1-wr-1"]?.submitted, undefined);
+  assert.throws(() => parseSnapshot({ revision: 3, progress: { ...progress, writing: { "w1-wr-1": { text: "Test", score: [], at: 1, submitted: "no" } } } }));
+});
