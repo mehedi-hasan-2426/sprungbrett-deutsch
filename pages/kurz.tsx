@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Link from "next/link";
-import type { GetStaticProps } from "next";
+import { protect } from "../src/server/protect.ts";
 import { Layout } from "../src/components/Layout.tsx";
 import { InlineText } from "../src/components/Blocks.tsx";
 import { ListeningSoon } from "../src/components/ListeningSoon.tsx";
@@ -57,7 +57,7 @@ export default function ShortDay({ weeks, shortDays }: Props) {
   );
 }
 
-export const getStaticProps: GetStaticProps<Props> = () => {
+export const getServerSideProps = protect<Props>(() => {
   const course = loadCourse();
   return {
     props: {
@@ -65,4 +65,4 @@ export const getStaticProps: GetStaticProps<Props> = () => {
       shortDays: course.weeks.map((w) => w.shortDay),
     },
   };
-};
+});

@@ -1,4 +1,4 @@
-import type { GetStaticProps } from "next";
+import { protect } from "../src/server/protect.ts";
 import type { Unit } from "../src/lib/types.ts";
 import { Layout } from "../src/components/Layout.tsx";
 import { UnitView } from "../src/components/UnitView.tsx";
@@ -64,7 +64,7 @@ export default function Placement({ unit, rubric, parts }: Props) {
   );
 }
 
-export const getStaticProps: GetStaticProps<Props> = () => {
+export const getServerSideProps = protect<Props>(() => {
   const course = loadCourse();
   const unit = course.placement;
   const labels: Record<string, [string, number]> = { A: ["reading", 5], C: ["vocabulary", 10], D: ["grammar", 20] };
@@ -75,4 +75,4 @@ export const getStaticProps: GetStaticProps<Props> = () => {
     ids: Object.values(unit.items).filter((i) => i.id.startsWith(`p-${teil.toLowerCase()}`)).map((i) => i.id),
   }));
   return { props: { unit, rubric: { criteria: ["Content", "Grammar", "Vocabulary/format"], max: 4, checklist: course.rubric.checklist }, parts } };
-};
+});

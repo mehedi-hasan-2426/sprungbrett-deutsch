@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { GetStaticProps } from "next";
+import { protect } from "../src/server/protect.ts";
 import type { Doc } from "../src/lib/types.ts";
 import { Layout } from "../src/components/Layout.tsx";
 import { Blocks } from "../src/components/Blocks.tsx";
@@ -38,7 +38,7 @@ export default function Plan({ doc }: { doc: Doc }) {
   );
 }
 
-export const getStaticProps: GetStaticProps<{ doc: Doc }> = () => {
+export const getServerSideProps = protect<{ doc: Doc }>(() => {
   const doc = loadCourse().docs.find((d) => d.slug === "plan");
   return doc ? { props: { doc } } : { notFound: true };
-};
+});

@@ -64,23 +64,18 @@ export function translateCourse(course: Course, en: Record<string, string>): { c
           return b;
       }
     });
-  const writingPrompt = (s: Inline[]): Inline[] => {
-    const parts = plainOf(s).split(" · ").map((p) => {
-      const bullet = p.startsWith("- ");
-      const body = bullet ? p.slice(2) : p;
-      return (bullet ? "- " : "") + (lookup(body, true) ?? body);
-    });
-    return parseInline(parts.join(" · "));
-  };
+  const readingIds = new Set([course.placement, ...course.weeks].flatMap((u) =>
+    u.sections.filter((s) => s.role === "reading").flatMap((s) => s.blocks.flatMap((b) => b.kind === "item" ? [b.itemId] : [])),
+  ));
   const unit = (u: Unit): Unit => ({
     ...u,
     title: str(u.title),
     intro: blocks(u.intro),
-    sections: u.sections.map((s) => ({ ...s, title: str(s.title), blocks: blocks(s.blocks) })),
+    sections: u.sections.map((s) => ({ ...s, title: str(s.title), blocks: s.role === "reading" || s.role === "writing" ? s.blocks : blocks(s.blocks) })),
     items: Object.fromEntries(
-      Object.entries(u.items).map(([id, item]) => [id, { ...item, prompt: prompt(item.prompt) }]),
+      Object.entries(u.items).map(([id, item]) => [id, { ...item, prompt: readingIds.has(id) ? item.prompt : prompt(item.prompt) }]),
     ),
-    writing: u.writing.map((w) => ({ ...w, prompt: writingPrompt(w.prompt) })),
+    writing: u.writing,
     notes: Object.fromEntries(Object.entries(u.notes).map(([k, v]) => [k, blocks(v)])),
     shortDay: u.shortDay.length ? segs(u.shortDay) : u.shortDay,
   });
@@ -91,7 +86,7 @@ export function translateCourse(course: Course, en: Record<string, string>): { c
     weeks: course.weeks.map(unit),
     checkpoints: course.checkpoints.map((cp) => {
       const next = { ...cp, canDo: cp.canDo.map((c) => str(c)) };
-      if (cp.writing) next.writing = { ...cp.writing, prompt: segs(cp.writing.prompt) };
+      if (cp.writing) next.writing = cp.writing;
       if (cp.speaking) next.speaking = segs(cp.speaking);
       return next;
     }),

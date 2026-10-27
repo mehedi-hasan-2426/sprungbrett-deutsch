@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Layout } from "../src/components/Layout.tsx";
+import { protect } from "../src/server/protect.ts";
 
 export default function Info() {
   return (
@@ -8,13 +9,11 @@ export default function Info() {
       <section className="card">
         <h2>Privacy</h2>
         <ul>
-          <li>No accounts, no cookies, no tracking, no ads, no analytics services.</li>
+          <li>Access is restricted to two approved Google accounts. Google handles sign-in; an encrypted, HTTP-only session cookie expires after at most eight hours. No ads or analytics are used.</li>
           <li>Your progress and your texts are stored only in this browser's local storage. They only leave your device if you export them yourself.</li>
           <li>Recordings stay only in the open tab and are never saved or uploaded.</li>
-          <li>
-            The read-aloud feature uses your device's or browser's voices. Some browsers use their vendor's online voices for this; only the exercise text is sent, never anything you
-            type.
-          </li>
+          <li>Listening is coming soon and is not scored. No audio is uploaded or played by a remote service.</li>
+          <li>Progress is separated by account in local storage, not encrypted against other people using the same browser profile. Use separate browser profiles on shared devices.</li>
           <li>The hosting provider may process technical access data (e.g. IP address) to run the site.</li>
         </ul>
       </section>
@@ -35,3 +34,5 @@ export default function Info() {
     </Layout>
   );
 }
+
+export const getServerSideProps = protect(() => ({ props: {} }));

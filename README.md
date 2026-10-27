@@ -2,12 +2,13 @@
 
 A privacy-first web app for practising German from A1 to A2, with instant feedback.
 It turns a 12-week course (placement test, weekly modules, checkpoints) into
-interactive exercises. Everything runs in the browser: no accounts, no tracking,
-no server-side data.
+interactive exercises. Course access requires one of exactly two approved Google
+accounts. Learning progress stays in this browser, separated by account; no
+learning data is uploaded and there is no analytics or progress database.
 
-All instructions, explanations, hints and buttons are in **English**. The practice
-material itself (sentences to complete, reading texts, dialogues, model texts,
-useful phrases) stays in **German**.
+Navigation, explanations and hints are in **English**. Reading and writing tasks
+and their instructions are in **German**. Every vocabulary entry has an English
+meaning, forms, and an original German example with an English translation.
 
 > Self-assessment only. The checkpoints are not a certificate, and no study plan can
 > guarantee a language level. The exercises are original, not official exam material.
@@ -17,7 +18,11 @@ useful phrases) stays in **German**.
 - **Placement test** with automatic scoring and a recommendation.
 - **12 weekly modules**: vocabulary, grammar explanations, grammar exercises,
   vocabulary retrieval, reading, listening, speaking, pronunciation, writing and a
-  cumulative quiz. 570 exercises in total.
+   cumulative quiz. 678 exercises in total, including 108 extra practice items.
+- **366 vocabulary entries**, including 120 new entries: ten per week.
+- **Easy, Medium and Hard** extra practice: recognition, guided completion and
+   open reading responses. Core checkpoint scores are unchanged; extra practice
+   has its own progress table. Hard remains within everyday A2 contexts.
 - **Instant feedback**: each answer is marked as soon as you press "Check"; a hint follows the
   first wrong answer, the solution and the rule follow the second. `ae/oe/ue/ss` are
   accepted for `ä/ö/ü/ß` with a spelling note; lowercase nouns are marked wrong.
@@ -30,8 +35,7 @@ useful phrases) stays in **German**.
 - **Flashcards** with Leitner boxes (1, 3, 7, 14, 30 days), at most 7 new cards a day
   and none when reviews would exceed 15 minutes.
 - **der/die/das and plural drill.**
-- **Listening** through the browser's speech synthesis (normal and slower). The script
-  stays hidden until the questions are answered.
+- **Listening** is a separate coming-soon area and is excluded from all scores.
 - **Speaking**: optional recording that stays in the tab, plus a self-rating rubric.
 - **Writing**: word counter, checklist, model text unlocked after submitting, rubric.
 - **Checkpoints** after weeks 4, 8 and 12 with the course's adjustment rules.
@@ -43,9 +47,15 @@ Requires Node.js 22.12 or newer.
 
 ```sh
 npm ci
+npm run build
+npm start          # loopback production server; configure auth first
 npm run dev        # http://localhost:3000
-npm run build      # static export to out/
 ```
+
+For local Google login, configure the variables below privately in `.env.local`.
+Use `NEXTAUTH_URL=http://localhost:3000` with the development server and register
+`http://localhost:3000/api/auth/callback/google` in a separate development OAuth
+client. Never put secrets in source or chat. Missing configuration denies access.
 
 ## Checks
 
@@ -56,6 +66,7 @@ npm test                 # unit tests and content tests
 npm run verify           # security checks
 npm run verify:negative  # proves the security checks fail when broken
 npm run build            # build plus CSP scan of the generated HTML
+node scripts/test-server.mjs # production-route tests with synthetic sessions
 ```
 
 ## Content pipeline
@@ -68,18 +79,30 @@ npm run build            # build plus CSP scan of the generated HTML
    (`content/generated/course.json`, not committed). It fails the build if any exercise
    lacks an answer, answer numbering does not match, a week is missing a skill, or a
    writing task lacks a model text.
-4. The same script replaces every German instruction with its English version from
+4. The same script translates interface/supporting instructions using
    `src/content/en.ts` (keyed by a hash of the German text; `"="` keeps German practice
-   material). The build fails if an instruction has no English entry. After changing the
+   material). Reading/writing instructions and prompts remain German. The build
+   fails if a required instruction has no English entry. After changing the
    course, run `node --experimental-strip-types scripts/dump-strings.ts` to list all
    instruction strings with their keys.
 5. `src/content/feedback-hints.ts` holds hints and one-line rules per exercise group;
    `src/content/overrides.ts` holds the few answers that cannot be derived mechanically.
+6. `src/content/vocabulary.ts` and `src/content/enrichment.ts` own bilingual glosses
+   and original additions. These survive re-syncing the source notes. Original
+   IDs are preserved and schema-v1 progress exports still import. New reading
+   responses are self-assessed, not falsely exact-match graded.
+
+The [learning references](docs/learning-sources.md) record five independent sources
+inspected before enrichment, their contributions and textbook-access limitations.
 
 ## Security model
 
-Static export, strict CSP (`default-src 'none'`, `script-src 'self'`, `style-src 'self'`,
-no `unsafe-*`), no HTML injection, validated imports, three pinned runtime dependencies,
+Server rendering with an authorization check on every course page and Next data
+request; no static course export or publicly bundled lesson data. Google sign-in
+requires verified email and an exact server-side two-address allowlist. Sessions
+use encrypted HTTP-only cookies, PKCE/state/nonce checks and an eight-hour absolute
+maximum. Strict CSP (`default-src 'none'`, `script-src 'self'`, `style-src 'self'`,
+no `unsafe-*`), no HTML injection, validated imports, four pinned runtime dependencies,
 SHA-pinned CI actions, CodeQL and gitleaks. The project builds with `--webpack` because
 Next.js 16's default Turbopack output contains an inline bootstrap script that a strict
 CSP would block. See [SECURITY.md](SECURITY.md) and
@@ -88,11 +111,40 @@ CSP would block. See [SECURITY.md](SECURITY.md) and
 ## Deploy on Vercel
 
 1. In Vercel, choose **Add New → Project** and import this GitHub repository.
-2. Framework preset: **Next.js** (detected). Keep the defaults; the build command comes
-   from `package.json` (`npm run build`). No environment variables are needed.
-3. Deploy, then check the response headers of the deployed site (for example in the
+2. Framework preset: **Next.js**. Use `npm run build` and leave Output Directory
+   override disabled; do not select `out` or deploy with the legacy static preview.
+3. In Google Auth Platform, create a **Web application** OAuth client. For personal
+   Gmail accounts choose an External audience, initially Testing, and add the two
+   intended users. Register exactly
+   `https://YOUR_DOMAIN/api/auth/callback/google`. Only `openid email` is requested;
+   Gmail, Drive and Calendar permissions are unnecessary.
+4. Set server-only environment variables in the intended Vercel environment:
+
+   | Variable | Value |
+   | --- | --- |
+   | `NEXTAUTH_URL` | Canonical HTTPS site origin |
+   | `NEXTAUTH_SECRET` | Privately generated random secret, at least 32 characters |
+   | `GOOGLE_CLIENT_ID` | OAuth client ID |
+   | `GOOGLE_CLIENT_SECRET` | OAuth client secret |
+   | `ALLOWED_EMAILS` | Exactly two distinct comma-separated Google-account emails |
+
+   Store both secrets using Vercel's Secret type. No variable uses `NEXT_PUBLIC_`.
+   Environment changes apply to new deployments. Use a separate OAuth client and
+   canonical callback URL for previews; otherwise previews intentionally deny access.
+5. Deploy, then check the response headers of the deployed site (for example in the
    browser's network tab) and confirm the `Content-Security-Policy` from `vercel.json`
    is present and the browser console shows no CSP violations.
+6. Verify anonymous lesson/data requests redirect to sign-in; sign in using both
+   approved users, reject a third account, then check sign-out and progress export/
+   import. Synthetic tests validate application policy but not Google's real consent
+   flow. Do not claim that flow passed until it has actually been exercised.
+
+Anonymous progress is not automatically assigned to any user. On Progress, explicit
+confirmation can migrate the previous browser data to the signed-in account; the
+old copy is removed only after saving. Export before replacing account progress.
+Shared browser profiles can inspect local storage; use separate profiles when
+privacy between people using the same machine matters. Login does not erase source
+already published in this public repository or copies from earlier deployments.
 
 ## Licence
 

@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useState } from "react";
-import navData from "../../content/generated/nav.json";
+import { createContext, useContext, useState } from "react";
 import type { NavWeek } from "../lib/weeks.ts";
 import { sectionTitle, weekTitle } from "../lib/weeks.ts";
 
-const NAV = navData as NavWeek[];
+export const CourseNavigation = createContext<NavWeek[]>([]);
 
 export function Sidebar() {
+  const navigation = useContext(CourseNavigation);
   const { query, asPath } = useRouter();
   const [term, setTerm] = useState("");
   const [open, setOpen] = useState(false);
@@ -15,7 +15,7 @@ export function Sidebar() {
   const q = term.trim().toLowerCase();
   const path = asPath.split(/[?#]/)[0];
 
-  const weeks = NAV.map((w) => {
+  const weeks = navigation.map((w) => {
     const sections = w.sections.filter((s) => !q || `${w.title} ${s.title}`.toLowerCase().includes(q));
     return { ...w, sections };
   }).filter((w) => !q || w.sections.length);

@@ -1,4 +1,4 @@
-import type { GetStaticPaths, GetStaticProps } from "next";
+import { protect } from "../../src/server/protect.ts";
 import type { Doc } from "../../src/lib/types.ts";
 import { Layout } from "../../src/components/Layout.tsx";
 import { Blocks } from "../../src/components/Blocks.tsx";
@@ -15,14 +15,7 @@ export default function MaterialPage({ doc }: { doc: Doc }) {
   );
 }
 
-export const getStaticPaths: GetStaticPaths = () => ({
-  paths: loadCourse()
-    .docs.filter((d) => d.slug !== "plan")
-    .map((d) => ({ params: { slug: d.slug } })),
-  fallback: false,
-});
-
-export const getStaticProps: GetStaticProps<{ doc: Doc }> = ({ params }) => {
+export const getServerSideProps = protect<{ doc: Doc }>(({ params }) => {
   const doc = loadCourse().docs.find((d) => d.slug === params?.slug);
   return doc ? { props: { doc } } : { notFound: true };
-};
+});

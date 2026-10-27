@@ -4,6 +4,7 @@ import { useRouter } from "next/router";
 import type { ReactNode } from "react";
 import { useProgress } from "../state/ProgressContext.tsx";
 import { Sidebar } from "./Sidebar.tsx";
+import { signOut } from "next-auth/react";
 
 const NAV = [
   { href: "/", label: "Today" },
@@ -36,6 +37,7 @@ export function Layout({ children, title }: { children: ReactNode; title?: strin
             </Link>
           ))}
         </nav>
+        <button type="button" className="link" onClick={() => signOut({ callbackUrl: "/signin" })}>Sign out</button>
       </header>
       {ready && !saved ? (
         <p className="feedback bad banner" role="alert">
@@ -48,7 +50,7 @@ export function Layout({ children, title }: { children: ReactNode; title?: strin
       </div>
       <footer>
         <p>
-          Everything stays on your device: no accounts, no tracking, no uploads. <Link href="/info">Privacy and licences</Link>
+          Progress stays in this browser, separated by Google account. No learning data is uploaded. <Link href="/info">Privacy and licences</Link>
         </p>
       </footer>
     </>

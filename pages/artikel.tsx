@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
-import type { GetStaticProps } from "next";
+import { protect } from "../src/server/protect.ts";
 import { Layout } from "../src/components/Layout.tsx";
 import { loadCourse } from "../src/server/load.ts";
 import { useProgress } from "../src/state/ProgressContext.tsx";
@@ -145,10 +145,10 @@ export default function ArticleDrill({ nouns }: Props) {
   );
 }
 
-export const getStaticProps: GetStaticProps<Props> = () => ({
+export const getServerSideProps = protect<Props>(() => ({
   props: {
     nouns: loadCourse()
       .vocab.filter((v) => v.article && v.noun)
       .map((v) => ({ id: v.id, week: v.week, article: v.article as Noun["article"], noun: v.noun ?? "", plural: v.plural ?? null })),
   },
-});
+}));

@@ -54,7 +54,7 @@ export function Blocks({ blocks, items, renderItem, idPrefix }: { blocks: Block[
           case "table":
             return (
               <div key={k} className="table-wrap">
-                <table>
+                <table className={b.variant === "vocabulary" ? "vocab-table" : undefined}>
                   <thead>
                     <tr>
                       {b.header.map((h, j) => (
@@ -68,7 +68,7 @@ export function Blocks({ blocks, items, renderItem, idPrefix }: { blocks: Block[
                     {b.rows.map((r, j) => (
                       <tr key={j}>
                         {r.map((c, i) => (
-                          <td key={i}>
+                          <td key={i} data-label={b.header[i]?.map((segment) => segment.t).join("")}>
                             <InlineText segs={c} />
                           </td>
                         ))}

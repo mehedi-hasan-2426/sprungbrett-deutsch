@@ -11,7 +11,7 @@ export type Block =
   | { kind: "h"; text: Inline[] }
   | { kind: "p"; text: Inline[] }
   | { kind: "list"; items: Inline[][]; checks?: boolean }
-  | { kind: "table"; header: Inline[][]; rows: Inline[][][] }
+  | { kind: "table"; header: Inline[][]; rows: Inline[][][]; variant?: "vocabulary" }
   | { kind: "quote"; lines: Inline[][] }
   | { kind: "code"; text: string }
   | { kind: "item"; itemId: string };
@@ -33,6 +33,7 @@ export interface Item {
   tag: Category;
   hint: string;
   rule: string;
+  difficulty?: "easy" | "medium" | "hard";
 }
 
 export interface Section {
@@ -79,6 +80,8 @@ export interface VocabEntry {
   term: string;
   forms: string;
   example: string;
+  meaning?: string;
+  exampleEn?: string;
   article?: "der" | "die" | "das";
   noun?: string;
   plural?: string;

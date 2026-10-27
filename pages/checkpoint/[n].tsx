@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { GetStaticPaths, GetStaticProps } from "next";
+import { protect } from "../../src/server/protect.ts";
 import type { Checkpoint, WritingTask as Task } from "../../src/lib/types.ts";
 import { Layout } from "../../src/components/Layout.tsx";
 import { InlineText } from "../../src/components/Blocks.tsx";
@@ -132,9 +132,7 @@ export default function CheckpointPage({ cp, week, tasks, speakingKey, criteria,
   );
 }
 
-export const getStaticPaths: GetStaticPaths = () => ({ paths: ["1", "2", "3"].map((n) => ({ params: { n } })), fallback: false });
-
-export const getStaticProps: GetStaticProps<Props> = ({ params }) => {
+export const getServerSideProps = protect<Props>(({ params }) => {
   const course = loadCourse();
   const cp = course.checkpoints.find((c) => c.n === Number(params?.n));
   const week = cp ? weekSummaries(course)[cp.week - 1] : undefined;
@@ -143,4 +141,4 @@ export const getStaticProps: GetStaticProps<Props> = ({ params }) => {
   return {
     props: { cp, week, tasks, speakingKey: cp.speaking ? `cp${cp.n}` : `w${cp.week}`, criteria: course.rubric.writing, checklist: course.rubric.checklist },
   };
-};
+});

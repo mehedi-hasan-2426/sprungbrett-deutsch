@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import type { ChangeEvent } from "react";
-import type { GetStaticProps } from "next";
+import { protect } from "../src/server/protect.ts";
 import { Layout } from "../src/components/Layout.tsx";
 import { loadCourse, weekSummaries } from "../src/server/load.ts";
 import type { WeekSummary } from "../src/lib/weeks.ts";
@@ -22,7 +22,7 @@ const COLUMNS: [string, string][] = [
 ];
 
 export default function ProgressPage({ weeks }: Props) {
-  const { progress, replace } = useProgress();
+  const { progress, replace, legacyAvailable, importLegacy } = useProgress();
   const [message, setMessage] = useState<string | null>(null);
   const file = useRef<HTMLInputElement>(null);
 
@@ -125,9 +125,39 @@ export default function ProgressPage({ weeks }: Props) {
         <p className="muted">Mistakes are information: they show what to practise next.</p>
       </section>
 
+      <section>
+        <h2>Extra practice</h2>
+        <p className="muted">Extra practice is tracked separately and does not change your core checkpoint scores.</p>
+        <div className="table-wrap">
+          <table>
+            <thead><tr><th scope="col">Week</th><th scope="col">Easy</th><th scope="col">Medium</th><th scope="col">Hard</th></tr></thead>
+            <tbody>{weeks.map((week) => (
+              <tr key={week.n}>
+                <th scope="row">{week.n}</th>
+                {["easy", "medium", "hard"].map((level) => {
+                  const score = groupScore(progress, week.practice?.[level] ?? []);
+                  return <td key={level}>{score.done}/{score.total}</td>;
+                })}
+              </tr>
+            ))}</tbody>
+          </table>
+        </div>
+      </section>
+
       <section className="card">
         <h2>Back up and transfer</h2>
         <p>Your progress is stored only in this browser. Export it as a file to back it up or move it to another device.</p>
+        {legacyAvailable ? (
+          <button type="button" className="secondary" onClick={() => {
+            if (!window.confirm("Assign the previous anonymous browser progress to this Google account and replace this account's current progress? Export current progress first. The anonymous copy will be removed only after saving.")) return;
+            try {
+              importLegacy();
+              setMessage("Previous browser progress assigned to this account.");
+            } catch (error) {
+              setMessage(error instanceof Error ? error.message : "Previous progress could not be imported.");
+            }
+          }}>Import previous browser progress</button>
+        ) : null}
         <div className="row">
           <button type="button" onClick={exportJson}>Export</button>
           <button type="button" className="secondary" onClick={() => file.current?.click()}>Import</button>
@@ -140,4 +170,4 @@ export default function ProgressPage({ weeks }: Props) {
   );
 }
 
-export const getStaticProps: GetStaticProps<Props> = () => ({ props: { weeks: weekSummaries(loadCourse()) } });
+export const getServerSideProps = protect<Props>(() => ({ props: { weeks: weekSummaries(loadCourse()) } }));
