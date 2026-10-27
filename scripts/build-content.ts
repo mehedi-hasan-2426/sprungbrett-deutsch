@@ -6,6 +6,8 @@ import { translateCourse } from "../src/lib/translate.ts";
 import { EN } from "../src/content/en.ts";
 import { enrichCoreVocabulary } from "../src/content/vocabulary.ts";
 import { addWeeklyPractice } from "../src/content/enrichment.ts";
+import { addGrammarPractice } from "../src/content/grammar.ts";
+import { makeSelfPaced } from "../src/content/self-paced.ts";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const SRC = join(ROOT, "content", "source");
@@ -51,6 +53,8 @@ if (missing.length) {
 
 english.vocab = enrichCoreVocabulary(english.vocab);
 addWeeklyPractice(english);
+makeSelfPaced(english);
+addGrammarPractice(english);
 for (const entry of english.vocab) {
   if (!entry.meaning?.trim() || !entry.exampleEn?.trim() || !entry.example.trim() || !entry.forms.trim()) {
     throw new Error(`Incomplete bilingual vocabulary: ${entry.id}`);
@@ -59,5 +63,5 @@ for (const entry of english.vocab) {
 writeFileSync(OUT, JSON.stringify(english));
 const nav = english.weeks.map((w, k) => ({ n: k + 1, title: w.title, sections: w.sections.map((s) => ({ id: s.id, title: s.title, role: s.role })) }));
 writeFileSync(join(dirname(OUT), "nav.json"), JSON.stringify(nav));
-const enrichedCount = [english.placement, ...english.weeks].reduce((sum, unit) => sum + Object.keys(unit.items).length, 0);
-console.log(`content: ${english.weeks.length} weeks, ${itemCount} -> ${enrichedCount} exercises, ${course.vocab.length} -> ${english.vocab.length} words, German reading/writing tasks`);
+const enrichedCount = [english.placement, ...english.weeks].reduce((sum, unit) => sum + Object.keys(unit.items).length, 0) + (english.grammar ?? []).reduce((sum, topic) => sum + topic.items.length, 0);
+console.log(`content: ${english.weeks.length} everyday topics, ${english.grammar?.length ?? 0} grammar topics, ${itemCount} -> ${enrichedCount} exercises, ${english.vocab.length} bilingual words`);

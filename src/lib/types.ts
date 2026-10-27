@@ -113,6 +113,17 @@ export interface Doc {
   blocks: Block[];
 }
 
+export interface GrammarTopic {
+  slug: string;
+  title: string;
+  group: string;
+  level: "A2" | "Extension";
+  summary: string;
+  rule: string;
+  source: string | null;
+  items: Item[];
+}
+
 export interface Course {
   placement: Unit;
   weeks: Unit[];
@@ -120,4 +131,5 @@ export interface Course {
   checkpoints: Checkpoint[];
   docs: Doc[];
   rubric: { writing: string[]; checklist: string[] };
+  grammar?: GrammarTopic[];
 }

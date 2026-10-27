@@ -18,6 +18,6 @@ export const ADVICE_TEXT: Record<Advice, string> = {
   incomplete: "Not all areas are done yet.",
   all80: "Continue as planned. Spend more time on speaking and free listening.",
   all60: "Continue as planned. Note areas under 80 % as focus points.",
-  "one-below": "Before the next week, add one extra day just for the weak area.",
-  "multi-below": "Repeat the weakest of the last 4 weeks. That is normal.",
+  "one-below": "Before the next topic, take extra practice time for the weak area.",
+  "multi-below": "Revisit the weakest recent topic at your own pace. That is normal.",
 };

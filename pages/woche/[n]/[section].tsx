@@ -28,14 +28,14 @@ export default function LessonPage({ n, unit, section, rubric, prev, next, index
   const week = weekTitle(unit.title).german;
   const title = sectionTitle(section.title);
   return (
-    <Layout title={`${title} · Week ${n}`}>
+    <Layout title={`${title} · Topic ${n}`}>
       <div className={outline.length > 1 ? "lesson-grid" : undefined}>
         <article>
           <nav className="crumbs" aria-label="Breadcrumb">
-            <Link href="/plan">Course</Link> <span aria-hidden="true">/</span> <Link href={`/woche/${n}`}>Week {n}: {week}</Link>{" "}
+            <Link href="/plan">Topics</Link> <span aria-hidden="true">/</span> <Link href={`/woche/${n}`}>Topic {n}: {week}</Link>{" "}
             <span aria-hidden="true">/</span> <span>{title}</span>
           </nav>
-          <p className="eyebrow">Week {n} · Lesson {index + 1} of {total}</p>
+          <p className="eyebrow">Topic {n} · Lesson {index + 1} of {total}</p>
           <h1>{title}</h1>
           <div className={`lesson-content role-${section.role}`}>
             <SectionView key={`${unit.id}-${section.id}`} unit={unit} section={section} rubric={rubric} idPrefix="h" />
@@ -72,12 +72,12 @@ export const getServerSideProps = protect<Props>(({ params }) => {
   const before = unit.sections[index - 1];
   const after = unit.sections[index + 1];
   const checkpoint = course.checkpoints.find((c) => c.week === n)?.n;
-  const prev = before ? { href: `/woche/${n}/${before.id}`, label: sectionTitle(before.title) } : n > 1 ? { href: `/woche/${n - 1}`, label: `Week ${n - 1}` } : null;
+  const prev = before ? { href: `/woche/${n}/${before.id}`, label: sectionTitle(before.title) } : n > 1 ? { href: `/woche/${n - 1}`, label: `Topic ${n - 1}` } : null;
   const next = after
     ? { href: `/woche/${n}/${after.id}`, label: sectionTitle(after.title) }
     : checkpoint
       ? { href: `/checkpoint/${checkpoint}`, label: `Checkpoint ${checkpoint}` }
-      : { href: `/woche/${n + 1}`, label: `Week ${n + 1}` };
+      : { href: `/woche/${n + 1}`, label: `Topic ${n + 1}` };
   return {
     props: { n, unit, section, rubric: { criteria: course.rubric.writing, max: 2, checklist: course.rubric.checklist }, prev, next, index, total: unit.sections.length },
   };

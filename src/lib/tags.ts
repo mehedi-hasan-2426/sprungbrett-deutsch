@@ -6,12 +6,12 @@ export interface CategoryInfo {
 }
 
 export const CATEGORIES: Record<Category, CategoryInfo> = {
-  VP: { label: "Verb position", practice: [{ label: "Week 1", href: "/woche/1" }, { label: "Week 7", href: "/woche/7" }, { label: "Week 9", href: "/woche/9" }] },
-  KA: { label: "Case and articles", practice: [{ label: "Week 2", href: "/woche/2" }, { label: "Week 3", href: "/woche/3" }, { label: "Week 6", href: "/woche/6" }] },
+  VP: { label: "Verb position", practice: [{ label: "Word order", href: "/grammatik/conjunctions/subordinate" }, { label: "Questions", href: "/grammatik/sentence-structure/answering-questions" }] },
+  KA: { label: "Case and articles", practice: [{ label: "Dative", href: "/grammatik/cases/dative" }, { label: "Choosing cases", href: "/grammatik/cases/nominative-accusative-dative" }] },
   GE: { label: "Gender (der/die/das)", practice: [{ label: "Article trainer", href: "/artikel" }] },
   PL: { label: "Plural", practice: [{ label: "Article trainer", href: "/artikel" }] },
-  VF: { label: "Verb form", practice: [{ label: "Week 1", href: "/woche/1" }, { label: "Week 4", href: "/woche/4" }] },
-  PR: { label: "Prepositions", practice: [{ label: "Week 3", href: "/woche/3" }, { label: "Week 6", href: "/woche/6" }, { label: "Week 10", href: "/woche/10" }] },
+  VF: { label: "Verb form", practice: [{ label: "Irregular verbs", href: "/grammatik/verbs/irregular" }, { label: "Present perfect", href: "/grammatik/tenses/present-perfect" }] },
+  PR: { label: "Prepositions", practice: [{ label: "Accusative or dative", href: "/grammatik/cases/accusative-dative" }] },
   WS: { label: "Vocabulary and understanding", practice: [{ label: "Flashcards", href: "/karten" }] },
   AU: { label: "Pronunciation", practice: [{ label: "Speaking and pronunciation", href: "/material/sprechen" }] },
   RS: { label: "Spelling and capitals", practice: [{ label: "Grammar overview", href: "/material/grammatik" }] },

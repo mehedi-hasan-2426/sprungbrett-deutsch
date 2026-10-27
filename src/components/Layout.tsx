@@ -14,7 +14,7 @@ const SYNC_LABEL = {
 
 const NAV = [
   { href: "/", label: "Today" },
-  { href: "/plan", label: "Plan" },
+  { href: "/plan", label: "Topics" },
   { href: "/karten", label: "Flashcards" },
   { href: "/artikel", label: "der/die/das" },
   { href: "/material/grammatik", label: "Grammar" },

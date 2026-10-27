@@ -76,7 +76,7 @@ export default function Cards({ vocab }: Props) {
       ) : current ? (
         <section className="card flashcard" aria-live="polite">
           <p className="muted">
-            Week {current.week} · {queue.length} cards left
+            Topic {current.week} · {queue.length} cards left
           </p>
           <p className="big" lang="de">{front(current).main}</p>
           <p>{front(current).ask}</p>
