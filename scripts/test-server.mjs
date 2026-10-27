@@ -89,6 +89,32 @@ try {
     assert.match(response.headers.get("content-security-policy") ?? "", /script-src 'self'/);
   }
   console.log("PASS both synthetic approved accounts receive bilingual lessons with private caching and strict CSP");
+  for (const active of [firstCookie, secondCookie]) {
+    const signIn = await request("/signin", active);
+    assert.equal(signIn.status, 307);
+    assert.equal(signIn.headers.get("location"), "/");
+    assert.match(signIn.headers.get("cache-control") ?? "", /private.*no-store/);
+    const home = await request("/", active);
+    assert.equal(home.status, 200);
+    assert.match(await home.text(), /<h1>Today<\/h1>/);
+  }
+  for (const inactive of [undefined, await cookie({ email: "other@example.com" }), await cookie({ signedInAt: Date.now() - 8 * 60 * 60 * 1000 })]) {
+    const signIn = await request("/signin", inactive);
+    assert.equal(signIn.status, 200);
+    assert.ok((await signIn.text()).includes("Continue with Google"));
+  }
+  console.log("PASS approved sessions leave sign-in for home; anonymous, disallowed and expired sessions keep the sign-in form");
+  for (const [target, expected] of [["/", "/"], ["/signin", "/signin"], ["https://evil.example/", "/signin"], ["//evil.example/", "/signin"]]) {
+    const response = await request("/api/auth/csrf?callbackUrl=" + encodeURIComponent(target));
+    assert.equal(response.status, 200);
+    const callback = response.headers.getSetCookie().find((value) => value.split("=")[0].endsWith("callback-url"));
+    assert.ok(callback, "NextAuth did not store the return destination");
+    const encoded = callback.split(";")[0].slice(callback.indexOf("=") + 1);
+    const destination = new URL(decodeURIComponent(encoded));
+    assert.equal(destination.origin, `https://localhost:${port}`);
+    assert.equal(destination.pathname, expected);
+  }
+  console.log("PASS NextAuth stores the relative home callback correctly and rejects external destinations");
   const firstSession = await (await request("/api/auth/session", firstCookie)).json();
   const secondSession = await (await request("/api/auth/session", secondCookie)).json();
   assert.notEqual(firstSession.accountKey, secondSession.accountKey);

@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import type { NextAuthOptions, Session } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
-import { approvedEmails, canAccess, sessionIsCurrent } from "../lib/access.ts";
+import { approvedEmails, canAccess, safeAuthRedirect, sessionIsCurrent } from "../lib/access.ts";
 
 export type CourseSession = Session & { accountKey?: string };
 
@@ -63,8 +63,7 @@ export const authOptions: NextAuthOptions = {
       return next;
     },
     async redirect({ url, baseUrl }) {
-      if (url === baseUrl || url === `${baseUrl}/`) return baseUrl;
-      return `${baseUrl}/signin`;
+      return safeAuthRedirect(url, baseUrl);
     },
   },
 };
