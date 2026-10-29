@@ -20,23 +20,38 @@ test("ae/oe/ue/ss are accepted with an umlaut note", () => {
   assert.equal(compareOne("Strasse", "Straße").ok, true);
 });
 
-test("lowercase noun is an error unless the blank starts a sentence", () => {
+test("capital and small letters never make an answer wrong; a tip is shown", () => {
   const mid = compareOne("bett", "Bett", false);
-  assert.equal(mid.ok, false);
-  assert.equal(mid.spellingOnly, true);
-  assert.equal(compareOne("kannst", "Kannst", true).ok, true);
-  assert.equal(compareOne("ich KAUFE ein", "ich kaufe ein").ok, false);
+  assert.equal(mid.ok, true);
+  assert.deepEqual(mid.notes, ["case"]);
+  assert.deepEqual(compareOne("kannst", "Kannst", true).notes, []);
+  assert.equal(compareOne("ich KAUFE ein", "ich kaufe ein").ok, true);
+  assert.equal(compareOne("der feierabend", "der Feierabend").ok, true);
 });
 
-test("missing comma is accepted with a note", () => {
+test("commas, full stops and other punctuation never make an answer wrong", () => {
   const v = compareOne("Ich komme zu spät weil der Bus Verspätung hat", "Ich komme zu spät, weil der Bus Verspätung hat.");
   assert.equal(v.ok, true);
-  assert.ok(v.notes.includes("comma"));
+  assert.ok(v.notes.includes("punctuation"));
+  assert.equal(compareOne("Der Feierabend.", "der Feierabend").ok, true);
+  assert.equal(compareOne("Wie geht's", "Wie geht's?").ok, true);
+  assert.equal(compareOne("ja, gern!", "Ja gern").ok, true);
+  const both = compareOne("ja gern", "Ja, gern!", false);
+  assert.equal(both.ok, true);
+  assert.ok(both.notes.includes("case") && both.notes.includes("punctuation"));
+});
+
+test("case and umlaut differences combine", () => {
+  const v = compareOne("strasse", "Straße", false);
+  assert.equal(v.ok, true);
+  assert.ok(v.notes.includes("umlaut") && v.notes.includes("case"));
 });
 
 test("wrong word is wrong", () => {
   assert.equal(compareOne("fahrt", "fährt").ok, false);
   assert.equal(compareOne("", "fährt").ok, false);
+  assert.equal(compareOne("...", "fährt").ok, false);
+  assert.equal(compareOne("die Feierabend", "der Feierabend").ok, false);
 });
 
 test("multi-blank answers are graded per blank", () => {

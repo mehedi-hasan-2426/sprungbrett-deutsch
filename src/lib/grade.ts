@@ -1,6 +1,6 @@
 import type { Item } from "./types.ts";
 
-export type Note = "case" | "umlaut" | "comma" | "first-letter";
+export type Note = "case" | "umlaut" | "punctuation";
 
 export interface Verdict {
   ok: boolean;
@@ -34,35 +34,25 @@ export function transliterate(input: string): string {
     .replace(/ß/g, "ss");
 }
 
-const noComma = (s: string) => s.replace(/,/g, "").replace(/\s+/g, " ");
+const PUNCTUATION = /[.,!?;:¡¿…–—-]/g;
+const withoutPunctuation = (s: string) => s.replace(PUNCTUATION, " ").replace(/\s+/g, " ").trim();
+const punctuationOf = (s: string) => s.replace(/[^.,!?;:¡¿…–—-]/g, "");
 
 export function compareOne(input: string, expected: string, relaxFirst = true): Verdict {
+  const fail: Verdict = { ok: false, notes: [], spellingOnly: false };
+  const a = normalize(input);
+  const e = normalize(expected);
+  const x = withoutPunctuation(a);
+  const y = withoutPunctuation(e);
+  if (!x) return fail;
+  const tx = transliterate(x);
+  const ty = transliterate(y);
+  if (tx.toLowerCase() !== ty.toLowerCase()) return fail;
   const notes: Note[] = [];
-  let a = normalize(input);
-  let e = normalize(expected);
-  if (!a) return { ok: false, notes, spellingOnly: false };
-  if (a !== e && noComma(a) === noComma(e)) {
-    notes.push("comma");
-    a = noComma(a);
-    e = noComma(e);
-  }
-  if (a === e) return { ok: true, notes, spellingOnly: false };
-  const firstOnly = (x: string, y: string) => relaxFirst && x.slice(1) === y.slice(1) && x[0]?.toLowerCase() === y[0]?.toLowerCase();
-  if (firstOnly(a, e)) {
-    notes.push("first-letter");
-    return { ok: true, notes, spellingOnly: false };
-  }
-  const ta = transliterate(a);
-  const te = transliterate(e);
-  if (ta === te || firstOnly(ta, te)) {
-    notes.push("umlaut");
-    return { ok: true, notes, spellingOnly: false };
-  }
-  if (ta.toLowerCase() === te.toLowerCase()) {
-    notes.push("case");
-    return { ok: false, notes, spellingOnly: true };
-  }
-  return { ok: false, notes, spellingOnly: false };
+  if (x.toLowerCase() !== y.toLowerCase()) notes.push("umlaut");
+  if (tx !== ty && !(relaxFirst && tx.slice(1) === ty.slice(1))) notes.push("case");
+  if (punctuationOf(a) !== punctuationOf(e)) notes.push("punctuation");
+  return { ok: true, notes, spellingOnly: false };
 }
 
 export function gradeItem(item: Item, inputs: string[]): Verdict {

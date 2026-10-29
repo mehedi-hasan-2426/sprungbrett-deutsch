@@ -10,10 +10,9 @@ import { InlineText } from "./Blocks.tsx";
 import { useProgress } from "../state/ProgressContext.tsx";
 
 const NOTE_TEXT: Record<Note, string> = {
-  umlaut: "Watch the spelling with ä, ö, ü or ß.",
-  comma: "Don't forget the comma.",
-  "first-letter": "",
-  case: "Check capital and lower-case letters.",
+  umlaut: "Tip: in German this is written with ä, ö, ü or ß.",
+  case: "Tip: German nouns and the first word of a sentence start with a capital letter.",
+  punctuation: "Tip: compare the commas and punctuation with the model answer.",
 };
 
 function Prompt({ text, blanks, values, setValue, disabled, label }: { text: string; blanks: number; values: string[]; setValue: (k: number, v: string) => void; disabled: boolean; label: string }) {
