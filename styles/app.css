@@ -302,6 +302,35 @@ summary { cursor: pointer; color: var(--accent); }
   footer { padding: 1rem; }
 }
 
+.path-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 1rem 2rem; margin-bottom: 1.75rem; }
+.path-head h1 { margin-bottom: 0.25rem; }
+.path-head p { margin: 0; max-width: 34rem; }
+.path { list-style: none; margin: 0 0 2rem; padding: 0; position: relative; max-width: 40rem; }
+.path::before { content: ""; position: absolute; left: 27px; top: 1.5rem; bottom: 1.5rem; width: 2px; background: linear-gradient(var(--action-line), var(--line) 30%); border-radius: 2px; }
+.path-step { position: relative; padding: 0.35rem 0; animation: path-in 0.45s ease-out both; }
+.path-node { display: flex; align-items: center; gap: 0.9rem; padding: 0.55rem 1.1rem 0.55rem 0.55rem; border: 1px solid var(--line); border-radius: 100px; background: var(--card); color: var(--fg); text-decoration: none; box-shadow: var(--raise); transition: border-color 0.15s, transform 0.15s; }
+.path-node:hover { border-color: var(--action-line); transform: translateX(3px); }
+.path-dot { flex: none; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: var(--tint); color: var(--muted); position: relative; z-index: 1; }
+.path-dot .role-icon { width: 26px; height: 26px; padding: 2px; color: inherit; }
+.path-text { display: flex; flex-direction: column; min-width: 0; flex: 1; line-height: 1.3; }
+.path-title { font-family: var(--serif); font-weight: 600; font-size: 1.08rem; }
+.path-detail { font-size: 0.82rem; color: var(--muted); overflow-wrap: anywhere; }
+.path-percent { flex: none; font-size: 0.8rem; font-weight: 600; color: var(--muted); font-variant-numeric: tabular-nums; }
+.is-done .path-dot { background: var(--ok-bg); color: var(--ok-fg); }
+.is-current .path-node { border-color: var(--action-line); box-shadow: 0 0 0 1px var(--action-line), 0 0 10px 2px var(--glow); }
+.is-current .path-dot { background: var(--action); color: var(--action-fg); }
+.is-current .path-percent { color: var(--accent); }
+.path-more { border-top: 1px solid var(--line); padding: 0.75rem 0; margin: 0; max-width: 40rem; }
+.path-more summary { font-weight: 600; min-height: 44px; display: flex; align-items: center; color: var(--fg); }
+.path-guides { display: flex; flex-wrap: wrap; gap: 0.5rem; list-style: none; padding: 0; margin: 0.5rem 0 0; }
+.path-guides a { display: inline-flex; align-items: center; min-height: 40px; padding: 0 1rem; border: 1px solid var(--line); border-radius: 100px; color: var(--fg); text-decoration: none; font-size: 0.9rem; }
+.path-guides a:hover { background: var(--tint); }
+.path-step:nth-child(2) { animation-delay: 40ms; } .path-step:nth-child(3) { animation-delay: 80ms; } .path-step:nth-child(4) { animation-delay: 120ms; }
+.path-step:nth-child(5) { animation-delay: 160ms; } .path-step:nth-child(6) { animation-delay: 200ms; } .path-step:nth-child(7) { animation-delay: 240ms; }
+.path-step:nth-child(8) { animation-delay: 280ms; } .path-step:nth-child(n+9) { animation-delay: 320ms; }
+@keyframes path-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
 @media (prefers-reduced-motion: reduce) {
+  .path-step { animation: none; }
   * { scroll-behavior: auto !important; transition: none !important; }
 }
