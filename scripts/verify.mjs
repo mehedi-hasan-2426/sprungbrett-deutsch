@@ -16,7 +16,7 @@ export const REQUIRED_HEADERS = [
 const read = (...parts) => readFileSync(join(ROOT, ...parts), "utf8");
 const walk = (dir) =>
   existsSync(dir) ? readdirSync(dir, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(join(dir, e.name)) : [join(dir, e.name)])) : [];
-const sourceFiles = () => ["src", "pages", "scripts", "tests"].flatMap((d) => walk(join(ROOT, d))).filter((f) => /\.(ts|tsx|mjs|js)$/.test(f));
+const sourceFiles = () => ["src", "pages", "public", "scripts", "tests"].flatMap((d) => walk(join(ROOT, d))).filter((f) => /\.(ts|tsx|mjs|js)$/.test(f));
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);

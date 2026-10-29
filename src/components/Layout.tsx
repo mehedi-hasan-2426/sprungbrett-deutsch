@@ -6,6 +6,7 @@ import { useProgress } from "../state/ProgressContext.tsx";
 import { Sidebar } from "./Sidebar.tsx";
 import { signOut } from "next-auth/react";
 import { useState } from "react";
+import { AppearancePicker } from "./AppearancePicker.tsx";
 
 const SYNC_LABEL = {
   loading: "Loading progress...", pending: "Save pending", saving: "Saving...",
@@ -61,6 +62,7 @@ export function Layout({ children, title }: { children: ReactNode; title?: strin
           ))}
         </nav>
         <div className="account-actions">
+          <AppearancePicker />
           <Link className="save-state" href="/fortschritt" aria-live="polite">{SYNC_LABEL[syncStatus]}</Link>
           <button type="button" className="link" onClick={leave} disabled={leaving}>{leaving ? "Signing out..." : "Sign out"}</button>
         </div>
