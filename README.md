@@ -44,6 +44,9 @@ meaning, forms, and an original German example with an English translation.
 - **Short day** mode (15 minutes), study streak, JSON export and import.
 - **Account progress sync**: debounced automatic saves, offline local copies, an
    explicit device/cloud choice on conflicts, and a recoverable copy before replacement.
+- **Appearance**: Light, Dark or System in the course header and sign-in page.
+   System follows device colour-scheme changes. The preference is kept on this
+   browser when storage is available, separately from account progress.
 
 ## Run locally
 

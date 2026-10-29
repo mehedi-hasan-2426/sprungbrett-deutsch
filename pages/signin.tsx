@@ -6,6 +6,7 @@ import { getServerSession } from "next-auth/next";
 import { authConfigured, authOptions } from "../src/server/auth.ts";
 import type { CourseSession } from "../src/server/auth.ts";
 import { canAccess } from "../src/lib/access.ts";
+import { AppearancePicker } from "../src/components/AppearancePicker.tsx";
 
 export default function SignIn({ configured, denied }: { configured: boolean; denied: boolean }) {
   const [pending, setPending] = useState(false);
@@ -29,6 +30,7 @@ export default function SignIn({ configured, denied }: { configured: boolean; de
       {denied ? <p role="alert">Access denied or sign-in failed. Only the two approved, verified Google accounts can enter.</p> : null}
       {failed ? <p role="alert">Sign-in could not start. Please try again.</p> : null}
       <button type="button" disabled={!configured || pending} onClick={login}>{pending ? "Opening Google..." : "Continue with Google"}</button>
+      <AppearancePicker />
     </main>
   );
 }
