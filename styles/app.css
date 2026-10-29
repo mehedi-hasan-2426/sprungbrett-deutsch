@@ -19,6 +19,7 @@
   --bad-bg: #ffe5e0;
   --bad-fg: #9b0000;
   --neutral-bg: #e7f3ff;
+  --warn: #a14e00;
   --focus: #0086e5;
   --glow: rgba(23, 158, 255, 0.35);
   --raise: 0 1px 2px rgba(13, 15, 17, 0.06), 0 4px 16px rgba(13, 15, 17, 0.05);
@@ -51,6 +52,7 @@
     --bad-bg: #3a0d10;
     --bad-fg: #ffbbac;
     --neutral-bg: #17222d;
+    --warn: #ffb454;
     --focus: #2aa6ff;
     --glow: rgba(42, 166, 255, 0.55);
     --raise: none;
@@ -79,6 +81,7 @@
   --bad-bg: #3a0d10;
   --bad-fg: #ffbbac;
   --neutral-bg: #17222d;
+  --warn: #ffb454;
   --focus: #2aa6ff;
   --glow: rgba(42, 166, 255, 0.55);
   --raise: none;
@@ -102,7 +105,8 @@ main[id], section[id], h3[id] { scroll-margin-top: 5rem; }
 
 .top { display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem; align-items: center; padding: 0.7rem 1.25rem; border-bottom: 1px solid var(--line); background: var(--bg); position: sticky; top: 0; z-index: 5; }
 .top nav { display: flex; flex-wrap: wrap; gap: 0.25rem 0.35rem; flex: 1; }
-.top nav a { display: inline-flex; align-items: center; min-height: 40px; text-decoration: none; color: var(--fg); padding: 0 0.85rem; font-size: 0.95rem; font-weight: 500; border-radius: 100px; }
+.top nav a { display: inline-flex; align-items: center; gap: 0.45rem; min-height: 40px; text-decoration: none; color: var(--fg); padding: 0 0.85rem; font-size: 0.95rem; font-weight: 500; border-radius: 100px; }
+.nav-icon { width: 18px; height: 18px; flex-shrink: 0; }
 .top nav a:hover { background: var(--tint); }
 .top nav a[aria-current="page"] { background: var(--action); color: var(--action-fg); font-weight: 600; }
 .brand { font-size: 1.3rem; text-decoration: none; color: var(--fg); }
@@ -111,11 +115,20 @@ main[id], section[id], h3[id] { scroll-margin-top: 5rem; }
 
 .shell { display: grid; grid-template-columns: 17rem minmax(0, 1fr); max-width: 84rem; margin: 0 auto; }
 .signin { width: min(100%, 36rem); margin: 4rem auto; padding: 1.5rem; }
-.account-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1rem; }
+.account-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 0.75rem; }
 .appearance-picker { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; max-width: 100%; font-size: 0.8rem; }
 .appearance-picker select { width: 6.5rem; min-height: 44px; font-size: 0.9rem; border-radius: 100px; padding: 0 0.75rem; }
+.account-actions .appearance-picker select { min-height: 40px; }
 .signin > .appearance-picker { display: flex; margin-top: 1rem; }
-.save-state { font-size: 0.8rem; min-width: 7rem; }
+.sync-status { display: inline-flex; align-items: center; gap: 0.5rem; min-height: 40px; padding: 0 0.9rem; border: 1px solid var(--line); border-radius: 100px; background: var(--card); color: var(--fg); font-size: 0.875rem; font-weight: 500; white-space: nowrap; }
+.sync-icon { width: 18px; height: 18px; flex-shrink: 0; }
+.sync-status .sync-icon { color: var(--accent); }
+.sync-status.is-warn .sync-icon { color: var(--warn); }
+.sync-status a { color: var(--fg); }
+.sync-retry, .sync-retry:hover { min-height: 0; margin: 0 -0.4rem 0 0.1rem; padding: 0.2rem 0.65rem; font-size: 0.8rem; background: transparent; color: var(--fg); border-color: var(--line); }
+.sync-retry:hover { background: var(--tint); }
+.sign-out, .sign-out:hover, .sign-out:disabled, .sign-out:disabled:hover { min-height: 40px; margin: 0; padding: 0 0.9rem; font-size: 0.875rem; font-weight: 500; background: transparent; color: var(--fg); border-color: var(--line); }
+.sign-out:hover { background: var(--tint); border-color: var(--muted); }
 .sync-panel { padding: 1rem 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
 .grammar-group { margin: 2rem 0 0; }
 .grammar-catalogue .lesson { grid-template-columns: minmax(0, 1fr); }
