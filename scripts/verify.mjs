@@ -109,11 +109,13 @@ export const checks = [
     }
     const protect = read("src", "server", "protect.ts");
     assert(/getServerSession/.test(protect) && /canAccess/.test(protect) && /private, no-store/.test(protect), "server authorization or private caching missing");
-    return "request-time checks; no static course pages";
+    assert(/isGuest\(context\.req\.cookies\)/.test(protect), "explicit guest course entry missing");
+    return "request-time account/guest checks; no static course pages";
   }],
   ["cloud progress is authenticated and versioned", () => {
     const route = read("pages", "api", "progress.ts");
     assert(/getServerSession/.test(route) && /canAccess/.test(route) && /sizeLimit: "1mb"/.test(route), "progress authorization or size limit missing");
+    assert(!/isGuest|GUEST_COOKIE/.test(route), "guest marker must not authorize cloud progress");
     const api = read("src", "server", "progress-api.ts");
     assert(/x-sprungbrett-sync/.test(api) && /request\.headers\.origin !== dependencies\.origin\(\)/.test(api) && /private, no-store/.test(api), "progress origin or private-cache protection missing");
     const store = read("src", "server", "progress-store.ts");

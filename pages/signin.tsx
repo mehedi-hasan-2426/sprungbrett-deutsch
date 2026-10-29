@@ -11,8 +11,11 @@ import { AppearancePicker } from "../src/components/AppearancePicker.tsx";
 export default function SignIn({ configured, denied }: { configured: boolean; denied: boolean }) {
   const [pending, setPending] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [guestPending, setGuestPending] = useState(false);
+  const [guestFailed, setGuestFailed] = useState(false);
   const login = async () => {
     setPending(true);
+    setFailed(false);
     try {
       await signIn("google", { callbackUrl: "/" });
     } catch {
@@ -20,17 +23,36 @@ export default function SignIn({ configured, denied }: { configured: boolean; de
       setPending(false);
     }
   };
+  const enterGuest = async () => {
+    setGuestPending(true);
+    setGuestFailed(false);
+    try {
+      const response = await fetch("/api/guest", { method: "POST", headers: { "x-sprungbrett-guest": "1" } });
+      if (!response.ok) throw new Error("Guest access unavailable");
+      window.location.assign("/");
+    } catch {
+      setGuestFailed(true);
+      setGuestPending(false);
+    }
+  };
   return (
-    <main className="signin">
+    <main className="signin-screen">
       <Head><title>Sign in · Sprungbrett</title><meta name="robots" content="noindex" /></Head>
-      <p className="eyebrow">Deutsch A1 → A2</p>
-      <h1>Sprungbrett</h1>
-      <p>Sign in with one of the two approved Google accounts.</p>
-      {!configured ? <p role="status">Sign-in setup is incomplete. Course access is closed until the owner configures it.</p> : null}
-      {denied ? <p role="alert">Access denied or sign-in failed. Only the two approved, verified Google accounts can enter.</p> : null}
-      {failed ? <p role="alert">Sign-in could not start. Please try again.</p> : null}
-      <button type="button" disabled={!configured || pending} onClick={login}>{pending ? "Opening Google..." : "Continue with Google"}</button>
-      <AppearancePicker />
+      <div className="signin-content">
+        <p className="signin-brand">Sprungbrett</p>
+        <h1>Deutsch lernen.<br />Schritt für Schritt.</h1>
+        <p className="signin-intro">Sign in to save your progress, or start learning as a guest.</p>
+        {!configured ? <p role="status">Google sign-in is unavailable. You can still continue as a guest.</p> : null}
+        {denied ? <p role="alert">Sign-in failed or this account is not approved. Try an approved Google account or continue as a guest.</p> : null}
+        {failed ? <p role="alert">Sign-in could not start. Please try again.</p> : null}
+        {guestFailed ? <p role="alert">Guest access could not start. Please try again.</p> : null}
+        <div className="signin-actions">
+          <button type="button" disabled={!configured || pending || guestPending} onClick={login}>{pending ? "Opening Google..." : "Continue with Google"}</button>
+          <button type="button" className="secondary" disabled={guestPending} onClick={enterGuest}>{guestPending ? "Opening lessons..." : "Continue as guest"}</button>
+        </div>
+        <p className="signin-note">No account needed to try it. Guest progress stays only in this browser.</p>
+        <div className="signin-appearance"><AppearancePicker /></div>
+      </div>
     </main>
   );
 }

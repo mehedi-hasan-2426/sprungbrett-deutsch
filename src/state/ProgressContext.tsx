@@ -6,8 +6,10 @@ import { dayKey } from "../lib/leitner.ts";
 import { parseSnapshot, ProgressSync } from "../lib/progress-sync.ts";
 import type { ProgressSnapshot, SyncStatus } from "../lib/progress-sync.ts";
 import { createProgressTransport } from "../lib/progress-client.ts";
+import { GUEST_PROGRESS_KEY } from "../lib/guest.ts";
 
 interface ProgressApi {
+  guest: boolean;
   progress: Progress;
   ready: boolean;
   saved: boolean;
@@ -34,8 +36,8 @@ function storage(): Storage | undefined {
   }
 }
 
-export function ProgressProvider({ children, accountKey }: { children: ReactNode; accountKey: string }) {
-  const key = progressStorageKey(accountKey);
+export function ProgressProvider({ children, accountKey, guest = false }: { children: ReactNode; accountKey: string; guest?: boolean }) {
+  const key = guest ? GUEST_PROGRESS_KEY : progressStorageKey(accountKey);
   const [progress, setProgress] = useState<Progress>(emptyProgress);
   const [ready, setReady] = useState(false);
   const [saved, setSaved] = useState(true);
@@ -63,6 +65,13 @@ export function ProgressProvider({ children, accountKey }: { children: ReactNode
       } catch {
         readable.current = false;
         setCacheInvalid(true);
+      }
+      if (guest) {
+        current.current = initial;
+        setProgress(initial);
+        setSaved(Boolean(localStorage) && readable.current);
+        setReady(true);
+        return;
       }
       try {
         const raw = localStorage?.getItem(key + ".sync");
@@ -114,7 +123,7 @@ export function ProgressProvider({ children, accountKey }: { children: ReactNode
       window.removeEventListener("online", refresh);
       window.removeEventListener("focus", refresh);
     };
-  }, [key]);
+  }, [key, guest]);
 
   const commit = useCallback((next: Progress, explicitReplacement = false) => {
     current.current = next;
@@ -125,10 +134,11 @@ export function ProgressProvider({ children, accountKey }: { children: ReactNode
     }
     if (!readable.current) return;
     setSaved(save(storage(), next, key));
+    if (guest) return;
     controller.current?.changed();
     if (timer.current) clearTimeout(timer.current);
     timer.current = setTimeout(() => { void controller.current?.sync(); }, 1500);
-  }, [key]);
+  }, [key, guest]);
 
   const update = useCallback((fn: (p: Progress) => Progress) => {
     commit(markDay(fn(current.current), dayKey(new Date())));
@@ -156,10 +166,11 @@ export function ProgressProvider({ children, accountKey }: { children: ReactNode
   }, [key, replace]);
 
   const importLegacy = useCallback(() => {
+    if (guest) return;
     replace(claimLegacyProgress(storage(), accountKey));
     setLegacyAvailable(false);
-  }, [accountKey, replace]);
-  const value = useMemo(() => ({ progress, ready, saved, update, replace, legacyAvailable, importLegacy, syncStatus, conflict, cacheInvalid, recoveryAvailable, restoreRecovery, syncNow, resolveSync }), [progress, ready, saved, update, replace, legacyAvailable, importLegacy, syncStatus, conflict, cacheInvalid, recoveryAvailable, restoreRecovery, syncNow, resolveSync]);
+  }, [accountKey, guest, replace]);
+  const value = useMemo(() => ({ guest, progress, ready, saved, update, replace, legacyAvailable, importLegacy, syncStatus, conflict, cacheInvalid, recoveryAvailable, restoreRecovery, syncNow, resolveSync }), [guest, progress, ready, saved, update, replace, legacyAvailable, importLegacy, syncStatus, conflict, cacheInvalid, recoveryAvailable, restoreRecovery, syncNow, resolveSync]);
   return <ProgressContext.Provider value={value}>{children}</ProgressContext.Provider>;
 }
 
