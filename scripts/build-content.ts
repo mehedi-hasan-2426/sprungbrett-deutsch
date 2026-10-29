@@ -6,6 +6,7 @@ import { translateCourse } from "../src/lib/translate.ts";
 import { EN } from "../src/content/en.ts";
 import { enrichCoreVocabulary } from "../src/content/vocabulary.ts";
 import { addWeeklyPractice } from "../src/content/enrichment.ts";
+import { addRecallPractice } from "../src/content/recall.ts";
 import { addGrammarPractice } from "../src/content/grammar.ts";
 import { makeSelfPaced } from "../src/content/self-paced.ts";
 
@@ -53,6 +54,7 @@ if (missing.length) {
 
 english.vocab = enrichCoreVocabulary(english.vocab);
 addWeeklyPractice(english);
+addRecallPractice(english);
 makeSelfPaced(english);
 addGrammarPractice(english);
 for (const entry of english.vocab) {
