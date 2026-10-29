@@ -9,7 +9,8 @@ export default function Info() {
       <section className="card">
         <h2>Privacy</h2>
         <ul>
-          <li>Access is restricted to two approved Google accounts. Google handles sign-in; an encrypted, HTTP-only session cookie expires after at most eight hours. No ads or analytics are used.</li>
+          <li>You can learn as a guest without an account. Guest answers and progress stay only in this browser, separately from account progress. A guest cookie remembers the choice for 30 days but grants no access to cloud progress.</li>
+          <li>Cloud progress requires one of two approved Google accounts. Google handles sign-in; an encrypted, HTTP-only session cookie expires after at most eight hours. No ads or analytics are used.</li>
           <li>Your exercise answers, writing drafts, flashcard progress and self-ratings sync over HTTPS to a private Neon Postgres record for your signed-in account. Vercel handles the authenticated save requests.</li>
           <li>This browser keeps a local copy for interrupted connections. Different device versions require an explicit choice; the other copy is backed up locally before replacement. Export remains available for an independent backup.</li>
           <li>Recordings stay only in the open tab and are never saved or uploaded.</li>

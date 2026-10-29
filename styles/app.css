@@ -115,6 +115,18 @@ main[id], section[id], h3[id] { scroll-margin-top: 5rem; }
 
 .shell { display: grid; grid-template-columns: 17rem minmax(0, 1fr); max-width: 84rem; margin: 0 auto; }
 .signin { width: min(100%, 36rem); margin: 4rem auto; padding: 1.5rem; }
+.signin-screen { display: grid; place-items: center; min-height: 100svh; max-width: none; margin: 0; padding: 2rem 1.25rem; }
+.signin-content { width: 100%; max-width: 440px; text-align: center; }
+.signin-brand { margin: 0 0 2rem; font-size: 1.15rem; font-weight: 600; }
+.signin-content h1 { margin: 0; font-size: 2.5rem; line-height: 1.15; letter-spacing: 0; }
+.signin-intro { margin: 1rem 0 1.75rem; color: var(--muted); font-size: 1rem; }
+.signin-actions { display: grid; gap: 0.75rem; }
+.signin-actions button { width: 100%; min-height: 56px; margin: 0; }
+.signin-note { margin: 1rem 0 0; color: var(--muted); font-size: 0.8125rem; }
+.signin-appearance { display: flex; justify-content: center; margin-top: 2rem; }
+@media (max-width: 380px) {
+  .signin-content h1 { font-size: 2rem; }
+}
 .account-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 0.75rem; }
 .appearance-picker { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; max-width: 100%; font-size: 0.8rem; }
 .appearance-picker select { width: 6.5rem; min-height: 44px; font-size: 0.9rem; border-radius: 100px; padding: 0 0.75rem; }

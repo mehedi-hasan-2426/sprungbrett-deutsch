@@ -2,9 +2,10 @@
 
 A privacy-first web app for practising German from A1 to A2, with instant feedback.
 It turns a self-paced course (placement test, everyday topics, checkpoints) into
-interactive exercises. Course access requires one of exactly two approved Google
-accounts. Learning progress syncs privately to Neon Postgres, separated by account,
-with a local browser copy for interrupted connections. No analytics are used.
+interactive exercises. Continue as a guest without an account: guest answers and
+progress stay only in this browser, separately from account progress. Cloud sync
+requires one of exactly two approved Google accounts. Account progress syncs privately
+to Neon Postgres, with a local copy for interrupted connections. No analytics are used.
 
 Navigation, explanations and hints are in **English**. Reading and writing tasks
 and their instructions are in **German**. Every vocabulary entry has an English
@@ -55,14 +56,15 @@ Requires Node.js 22.12 or newer.
 ```sh
 npm ci
 npm run build
-npm start          # loopback production server; configure auth first
+npm start          # loopback production server; guest access needs no OAuth setup
 npm run dev        # http://localhost:3000
 ```
 
 For local Google login, configure the variables below privately in `.env.local`.
 Use `NEXTAUTH_URL=http://localhost:3000` with the development server and register
 `http://localhost:3000/api/auth/callback/google` in a separate development OAuth
-client. Never put secrets in source or chat. Missing configuration denies access.
+client. Never put secrets in source or chat. Missing configuration disables Google
+sign-in and cloud progress; guest lessons remain available.
 
 ## Checks
 
@@ -104,8 +106,11 @@ initial enrichment. Additional practice links are available inside grammar topic
 
 ## Security model
 
-Server rendering with an authorization check on every course page and Next data
-request; no static course export or publicly bundled lesson data. Google sign-in
+Server rendering with an account or explicit guest check on every course page and
+Next data request; no static course export or publicly bundled lesson data. Guest
+entry sets an HTTP-only, same-site course marker via a same-origin request. It is not
+an identity and never authorizes the progress API. Guest storage is not automatically
+uploaded or merged when signing in. Google sign-in
 requires verified email and an exact server-side two-address allowlist. Sessions
 use encrypted HTTP-only cookies, PKCE/state/nonce checks and an eight-hour absolute
 maximum. Strict CSP (`default-src 'none'`, `script-src 'self'`, `style-src 'self'`,
@@ -142,9 +147,10 @@ CSP would block. See [SECURITY.md](SECURITY.md) and
 5. Deploy, then check the response headers of the deployed site (for example in the
    browser's network tab) and confirm the `Content-Security-Policy` from `vercel.json`
    is present and the browser console shows no CSP violations.
-6. Verify anonymous lesson/data requests redirect to sign-in; sign in using both
-   approved users, reject a third account, then check sign-out and progress export/
-   import. Synthetic tests validate application policy but not Google's real consent
+6. Verify lesson/data requests without an account or guest marker redirect to sign-in.
+   Enter as a guest and confirm browser-only progress and no progress API requests.
+   Sign in using both approved users, reject a third account, then check sign-out
+   and progress export/import. Synthetic tests validate application policy but not Google's real consent
    flow. Do not claim that flow passed until it has actually been exercised.
 
 Anonymous progress is not automatically assigned to any user. On Progress, explicit

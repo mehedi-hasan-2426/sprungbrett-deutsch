@@ -24,7 +24,7 @@ const COLUMNS: [string, string][] = [
 ];
 
 export default function ProgressPage({ weeks, grammar }: Props) {
-  const { progress, replace, legacyAvailable, importLegacy, syncStatus, conflict, syncNow, resolveSync, recoveryAvailable, restoreRecovery } = useProgress();
+  const { guest, progress, replace, legacyAvailable, importLegacy, syncStatus, conflict, syncNow, resolveSync, recoveryAvailable, restoreRecovery } = useProgress();
   const [message, setMessage] = useState<string | null>(null);
   const file = useRef<HTMLInputElement>(null);
 
@@ -67,7 +67,7 @@ export default function ProgressPage({ weeks, grammar }: Props) {
   };
 
   const reset = () => {
-    if (window.confirm("Reset this account's current progress and sync the empty copy to other devices? Existing exports and recovery backups are kept. Export a backup first.")) {
+    if (window.confirm(guest ? "Reset guest progress in this browser only? Export a backup first. Account progress will not change." : "Reset this account's current progress and sync the empty copy to other devices? Existing exports and recovery backups are kept. Export a backup first.")) {
       replace(emptyProgress());
       setMessage("Progress deleted.");
     }
@@ -77,7 +77,7 @@ export default function ProgressPage({ weeks, grammar }: Props) {
     <Layout title="Progress">
       <h1>Progress</h1>
       <p className="muted">Percent = correct on the first try. Self-assessment, not a certificate.</p>
-      <section className="sync-panel" aria-labelledby="sync-heading">
+      {guest ? <section className="sync-panel"><h2>Browser-only save</h2><p>Guest progress is kept only in this browser. No answers are sent to the server. Export a backup before clearing browser data or switching devices.</p></section> : <section className="sync-panel" aria-labelledby="sync-heading">
         <h2 id="sync-heading">Account save</h2>
         <p role="status">{syncStatus === "saved" ? "Saved to your account." : syncStatus === "conflict" ? "Device and cloud progress differ. Choose a copy; the other is kept as a recovery backup on this device." : syncStatus === "offline" ? "Cloud sync is unavailable. Your device copy is kept; retry when online." : "Progress sync is in progress."}</p>
         {conflict ? (
@@ -101,7 +101,7 @@ export default function ProgressPage({ weeks, grammar }: Props) {
           try { restoreRecovery(); setMessage("Recovery copy restored on this device."); }
           catch (error) { setMessage(error instanceof Error ? error.message : "Recovery failed."); }
         }}>Restore Recovery Copy</button> : null}
-      </section>
+      </section>}
       <section className="card">
         <h2>Everyday topics</h2>
         <div className="table-wrap">
@@ -173,7 +173,7 @@ export default function ProgressPage({ weeks, grammar }: Props) {
 
       <section className="card">
         <h2>Back up and transfer</h2>
-        <p>Progress syncs to your Google-account identity when available. Export a file for an independent backup; importing replaces this account's device copy and will sync after any conflict is resolved.</p>
+        <p>{guest ? "Export guest progress for a backup or transfer it manually. Importing replaces only this browser's guest copy; it never uploads to an account." : "Progress syncs to your Google-account identity when available. Export a file for an independent backup; importing replaces this account's device copy and will sync after any conflict is resolved."}</p>
         {legacyAvailable ? (
           <button type="button" className="secondary" onClick={() => {
             if (!window.confirm("Assign the previous anonymous browser progress to this Google account and replace this account's current progress? Export current progress first. The anonymous copy will be removed only after saving.")) return;

@@ -29,8 +29,16 @@ Sprungbrett uses Next.js request-time rendering and NextAuth's Google provider.
 Progress is stored in private Neon Postgres records. There is no analytics and no
 third-party browser scripts.
 Google handles sign-in; the application checks verified email against exactly two
-configured addresses on sign-in and on every protected page/data request. Missing
-or invalid configuration denies access. Course responses are private and no-store.
+configured addresses on sign-in and on every account page/data request. Missing
+or invalid configuration denies account access. Course responses are private and no-store.
+
+- Explicit guest entry permits reading course pages without authentication. A
+  same-origin POST with a custom header sets an HTTP-only, SameSite=Lax cookie
+  (Secure on HTTPS), expiring after 30 days. This marker is not an identity and is
+  never accepted by the progress API. Guest answers stay only under a separate
+  browser-storage key; the guest provider never creates a cloud-sync transport.
+  Signing in does not upload or merge guest progress automatically. Leaving guest
+  mode clears the marker, not browser progress. Clearing browser data removes it.
 
 - Learner progress, written texts and self-ratings sync over HTTPS through an
   authenticated API; a browser copy is namespaced by a hash of the provider subject.

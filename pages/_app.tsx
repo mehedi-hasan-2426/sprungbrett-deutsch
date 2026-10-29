@@ -7,18 +7,19 @@ import { CourseNavigation } from "../src/components/Sidebar.tsx";
 import type { CourseSession } from "../src/server/auth.ts";
 import type { NavWeek } from "../src/lib/weeks.ts";
 
-type PageProps = { session?: CourseSession; courseNav?: NavWeek[] };
+type PageProps = { session?: CourseSession | null; guest?: boolean; courseNav?: NavWeek[] };
 
 function CourseApp({ Component, pageProps, router }: AppProps<PageProps>) {
   const { data, status } = useSession();
   const session = data as CourseSession | null;
   if (router.pathname === "/signin") return <Component {...pageProps} />;
-  if (status !== "authenticated" || !session?.accountKey) {
+  const accountKey = pageProps.guest ? "guest" : session?.accountKey;
+  if (!accountKey || (!pageProps.guest && status !== "authenticated")) {
     return <main className="signin"><h1>Sprungbrett</h1><p>{status === "loading" ? "Checking your session..." : "Your session has ended."}</p><Link href="/signin">Sign in</Link></main>;
   }
   return (
     <CourseNavigation.Provider value={pageProps.courseNav ?? []}>
-      <ProgressProvider key={session.accountKey} accountKey={session.accountKey}>
+      <ProgressProvider key={accountKey} accountKey={accountKey} guest={pageProps.guest}>
         <Component {...pageProps} />
       </ProgressProvider>
     </CourseNavigation.Provider>

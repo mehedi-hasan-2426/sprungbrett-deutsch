@@ -1,7 +1,7 @@
 # Threat model
 
-Covers authenticated server-rendered access, the content pipeline and account progress
-in Neon Postgres with a local browser cache.
+Covers account and guest server-rendered access, the content pipeline, browser-only
+guest progress and account progress in Neon Postgres with a local browser cache.
 Method is STRIDE over the data flow below.
 
 ## Data flow
@@ -13,9 +13,11 @@ flowchart LR
     J --> B[next build --webpack<br/>server-only course data]
     G[Google verified identity] --> A[NextAuth: exact two-email allowlist]
     A --> R[Authorize every course page and data request]
+    GE[Explicit same-origin guest entry] --> R
     B -->|check-output.mjs| R
     R -->|HTTPS; private no-store| BR[Browser]
     BR <-->|account-specific progress JSON| LS[(localStorage)]
+    BR <-->|guest progress, separate key, no upload| GL[(Guest localStorage)]
     BR <-->|same-origin validated requests| P[Progress API: session owner and revision]
     P <-->|parameterized SQL over HTTPS| DB[(Private Neon Postgres)]
     BR -->|explicit export / import| F[JSON file]
@@ -41,6 +43,14 @@ and alias emails, unverified identities, expiry, future timestamps and data URLs
 They do not prove that the configured Google client or real consent flow works.
 The site cannot be framed (`frame-ancestors 'none'`, `X-Frame-Options: DENY`), which
 prevents a look-alike page from overlaying it.
+
+Guests can intentionally read course pages without a Google identity. Same-origin
+POST/DELETE requests with a custom header set/clear an HTTP-only, SameSite=Lax guest
+marker (Secure on HTTPS, 30 days). It is deliberately not a secret or proof of
+identity. A forged marker can only access the same guest course content; it cannot
+read or write account progress. The server progress API still requires an approved
+session. The guest provider never creates a network transport; work is kept under a
+separate browser key and is not automatically merged or uploaded on sign-in.
 
 ## Tampering
 
