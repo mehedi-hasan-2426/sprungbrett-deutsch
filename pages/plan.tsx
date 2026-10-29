@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Fragment } from "react";
 import { protect } from "../src/server/protect.ts";
 import type { Doc } from "../src/lib/types.ts";
 import { Layout } from "../src/components/Layout.tsx";
@@ -7,7 +6,7 @@ import { Blocks } from "../src/components/Blocks.tsx";
 import { RoleIcon } from "../src/components/RoleIcon.tsx";
 import { loadCourse, weekSummaries } from "../src/server/load.ts";
 import type { WeekSummary } from "../src/lib/weeks.ts";
-import { currentWeek, weekTitle } from "../src/lib/weeks.ts";
+import { currentWeek, STAGES, weekTitle } from "../src/lib/weeks.ts";
 import { groupScore } from "../src/lib/progress.ts";
 import { useProgress } from "../src/state/ProgressContext.tsx";
 
@@ -24,8 +23,6 @@ const GUIDES: [string, string][] = [
   ["/material/sprechen", "Speaking and pronunciation"],
   ["/material/schreiben", "Writing rubric and phrases"],
 ];
-
-const CHECKPOINT_AFTER: Record<number, number> = { 4: 1, 8: 2, 12: 3 };
 
 type Status = "done" | "current" | "todo";
 
@@ -74,18 +71,28 @@ export default function Plan({ doc, weeks, placementIds }: Props) {
 
       <ol className="path">
         <Step href="/einstufung" status={placementDone ? "done" : "todo"} title="Einstufungstest" detail="Placement test · optional starting point" icon="placement" />
-        {weeks.map((w) => {
-          const { status, percent } = topicState(w);
-          const { german, english } = weekTitle(w.title);
-          const cp = CHECKPOINT_AFTER[w.n];
-          return (
-            <Fragment key={w.n}>
-              <Step href={`/woche/${w.n}`} status={status} title={german} detail={english ? `Topic ${w.n} · ${english}` : `Topic ${w.n}`} icon="reading" percent={percent} />
-              {cp ? <Step href={`/checkpoint/${cp}`} status="todo" title={`Checkpoint ${cp}`} detail="Check what you can do so far" icon="other" /> : null}
-            </Fragment>
-          );
-        })}
       </ol>
+
+      {STAGES.map((stage) => {
+        const topics = weeks.filter((w) => (stage.topics as readonly number[]).includes(w.n));
+        const states = topics.map(topicState);
+        const stageDone = states.every((s) => s.status === "done");
+        return (
+          <section key={stage.n} className="path-stage" aria-labelledby={`stage-${stage.n}`}>
+            <h2 id={`stage-${stage.n}`} className="path-stage-title">
+              {stage.title} <span className="muted">Topics {stage.topics[0]}–{stage.topics[stage.topics.length - 1]}</span>
+            </h2>
+            <ol className="path">
+              {topics.map((w, k) => {
+                const { status, percent } = states[k] ?? { status: "todo" as Status, percent: 0 };
+                const { german, english } = weekTitle(w.title);
+                return <Step key={w.n} href={`/woche/${w.n}`} status={status} title={german} detail={english ? `Topic ${w.n} · ${english}` : `Topic ${w.n}`} icon="reading" percent={percent} />;
+              })}
+              <Step href={`/checkpoint/${stage.checkpoint}`} status={stageDone ? "current" : "todo"} title={`Checkpoint ${stage.checkpoint}`} detail={`Check what you can do after topics ${stage.topics[0]}–${stage.topics[stage.topics.length - 1]}`} icon="other" />
+            </ol>
+          </section>
+        );
+      })}
 
       <details className="path-more">
         <summary>Guides and resources</summary>

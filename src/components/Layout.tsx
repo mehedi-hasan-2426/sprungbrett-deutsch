@@ -7,20 +7,44 @@ import { Sidebar } from "./Sidebar.tsx";
 import { signOut } from "next-auth/react";
 import { useState } from "react";
 import { AppearancePicker } from "./AppearancePicker.tsx";
-
-const SYNC_LABEL = {
-  loading: "Loading progress...", pending: "Save pending", saving: "Saving...",
-  saved: "Saved to cloud", offline: "Cloud unavailable", conflict: "Progress conflict",
-};
+import { RoleIcon } from "./RoleIcon.tsx";
+import type { SyncStatus } from "../lib/progress-sync.ts";
 
 const NAV = [
-  { href: "/", label: "Today" },
-  { href: "/plan", label: "Topics" },
-  { href: "/karten", label: "Flashcards" },
-  { href: "/artikel", label: "der/die/das" },
-  { href: "/material/grammatik", label: "Grammar" },
-  { href: "/fortschritt", label: "Progress" },
+  { href: "/", label: "Today", icon: "today" },
+  { href: "/plan", label: "Topics", icon: "path" },
+  { href: "/karten", label: "Flashcards", icon: "cards" },
+  { href: "/artikel", label: "der/die/das", icon: "article" },
+  { href: "/material/grammatik", label: "Grammar", icon: "grammar" },
+  { href: "/fortschritt", label: "Progress", icon: "progress" },
 ];
+
+function SyncIndicator({ status, retry }: { status: SyncStatus; retry: () => void }) {
+  if (status === "offline") {
+    return (
+      <div className="sync-status is-warn" role="status">
+        <RoleIcon role="cloud-alert" className="sync-icon" />
+        <span>Couldn&rsquo;t sync</span>
+        <button type="button" className="sync-retry" onClick={retry}>Retry</button>
+      </div>
+    );
+  }
+  if (status === "conflict") {
+    return (
+      <div className="sync-status is-warn" role="status">
+        <RoleIcon role="cloud-alert" className="sync-icon" />
+        <Link href="/fortschritt">Resolve sync conflict</Link>
+      </div>
+    );
+  }
+  const [icon, label] = status === "saved" ? ["cloud-check", "Saved to cloud"] : status === "loading" ? ["cloud", "Loading progress…"] : ["cloud-upload", "Saving…"];
+  return (
+    <div className="sync-status" role="status">
+      <RoleIcon role={icon} className="sync-icon" />
+      <span>{label}</span>
+    </div>
+  );
+}
 
 export function Layout({ children, title }: { children: ReactNode; title?: string }) {
   const { pathname } = useRouter();
@@ -45,26 +69,30 @@ export function Layout({ children, title }: { children: ReactNode; title?: strin
   return (
     <>
       <Head>
-        <title>{title ? `${title} · Sprungbrett` : "Sprungbrett · German A1 → A2"}</title>
+        <title>{title ? `${title} · Sprungbrett` : "Sprungbrett · Deutsch lernen"}</title>
       </Head>
       <a className="skip" href="#main">
         Skip to content
       </a>
       <header className="top">
         <Link href="/" className="brand">
-          Sprungbrett <span className="brand-tag">A1 → A2</span>
+          Sprungbrett <span className="brand-tag">Deutsch</span>
         </Link>
         <nav aria-label="Main navigation">
           {NAV.map((n) => (
             <Link key={n.href} href={n.href} aria-current={pathname === n.href ? "page" : undefined}>
+              <RoleIcon role={n.icon} className="nav-icon" />
               {n.label}
             </Link>
           ))}
         </nav>
         <div className="account-actions">
           <AppearancePicker />
-          <Link className="save-state" href="/fortschritt" aria-live="polite">{SYNC_LABEL[syncStatus]}</Link>
-          <button type="button" className="link" onClick={leave} disabled={leaving}>{leaving ? "Signing out..." : "Sign out"}</button>
+          <SyncIndicator status={syncStatus} retry={() => { syncNow().catch(() => undefined); }} />
+          <button type="button" className="sign-out" onClick={leave} disabled={leaving}>
+            <RoleIcon role="log-out" className="sync-icon" />
+            {leaving ? "Signing out…" : "Sign out"}
+          </button>
         </div>
       </header>
       {logoutError ? <p className="feedback bad banner" role="alert">Sign-out failed. Please try again; your progress has not been deleted.</p> : null}

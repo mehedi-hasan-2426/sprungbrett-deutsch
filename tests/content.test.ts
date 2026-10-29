@@ -79,10 +79,10 @@ test("extra practice and listening never alter core checkpoint scoring", () => {
   for (const week of weekSummaries(course)) {
     assert.equal(week.ids.listening, undefined);
     const core = Object.values(week.ids).flat();
-    assert.ok(core.every((id) => !id.includes("-plus-")));
+    assert.ok(core.every((id) => !id.includes("-plus-") && !id.includes("-r-")));
     for (const level of ["easy", "medium", "hard"]) {
       const practice = week.practice?.[level] ?? [];
-      assert.equal(practice.length, 3);
+      assert.equal(practice.filter((id) => id.includes("-plus-")).length, 3);
       assert.ok(practice.every((id) => !core.includes(id)));
     }
   }
@@ -101,10 +101,10 @@ test("every week adds ten words and three exercises per difficulty without chang
   for (const unit of course.weeks) {
     const original = source.weeks.find((week) => week.id === unit.id);
     assert.ok(original);
-    assert.equal(Object.keys(unit.items).length, Object.keys(original.items).length + 9);
+    assert.equal(Object.keys(unit.items).length, Object.keys(original.items).length + 9 + 30);
     assert.equal(course.vocab.filter((entry) => entry.id.startsWith(`${unit.id}-plus-word-`)).length, 10);
     for (const difficulty of ["easy", "medium", "hard"]) {
-      assert.equal(Object.values(unit.items).filter((item) => item.difficulty === difficulty).length, 3);
+      assert.equal(Object.values(unit.items).filter((item) => item.difficulty === difficulty && item.id.includes("-plus-")).length, 3);
     }
     for (const id of Object.keys(original.items)) assert.ok(unit.items[id], id);
     const terms = course.vocab.filter((entry) => entry.week === Number(unit.id.slice(1))).map((entry) => entry.term);

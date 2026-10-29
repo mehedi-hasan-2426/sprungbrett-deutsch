@@ -14,7 +14,7 @@ function planningBlock(block: Block): Block {
 
 export function makeSelfPaced(course: Course): void {
   for (const unit of course.weeks) {
-    unit.title = topicText(unit.title);
+    unit.title = topicText(unit.title).replace(/\s*·\s*Checkpoint \d+\s*$/, "");
     unit.intro = unit.intro.filter((block) => {
       if (block.kind === "p") return !/^Time:/i.test(block.text.map((segment) => segment.t).join("").trim());
       if (block.kind === "table") return !/^(?:Day|Week)$/i.test(block.header[0]?.map((segment) => segment.t).join("").trim() ?? "");
