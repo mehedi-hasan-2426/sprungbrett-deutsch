@@ -6,7 +6,7 @@ import { loadCourse, weekSummaries } from "../src/server/load.ts";
 import { currentWeek, ROLE_LABEL } from "../src/lib/weeks.ts";
 import type { WeekSummary } from "../src/lib/weeks.ts";
 import { useProgress } from "../src/state/ProgressContext.tsx";
-import { dayKey, dueCards, newCardAllowance, addDays } from "../src/lib/leitner.ts";
+import { dayKey, dueCards, newCardAllowance, newPerDay, addDays } from "../src/lib/leitner.ts";
 import { groupScore, streak } from "../src/lib/progress.ts";
 import { suggest } from "../src/lib/tags.ts";
 
@@ -22,7 +22,7 @@ export default function Home({ weeks, placementIds, roleOrder }: Props) {
   const today = dayKey(new Date(now));
   const due = dueCards(progress.cards, today).length;
   const introduced = progress.newCards.day === today ? progress.newCards.count : 0;
-  const fresh = newCardAllowance(due, introduced);
+  const fresh = newCardAllowance(due, introduced, newPerDay(progress.settings));
   const placement = groupScore(progress, placementIds);
   const week = currentWeek(weeks, progress);
   const nextRole = week ? roleOrder.find((r) => {

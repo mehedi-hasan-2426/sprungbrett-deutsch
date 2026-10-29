@@ -12,6 +12,7 @@ export interface WeekSummary {
 export interface NavWeek {
   n: number;
   title: string;
+  total?: number;
   sections: { id: string; title: string; role: string }[];
 }
 

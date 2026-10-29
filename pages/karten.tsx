@@ -2,39 +2,44 @@ import { useState } from "react";
 import { protect } from "../src/server/protect.ts";
 import { Layout } from "../src/components/Layout.tsx";
 import { loadCourse } from "../src/server/load.ts";
-import type { VocabEntry } from "../src/lib/types.ts";
+import { KNOWLEDGE_DECKS } from "../src/content/knowledge.ts";
+import { fromKnowledge, fromVocab, newCardOrder, TOPIC_DECK } from "../src/lib/flashcards.ts";
+import type { DeckOption, Flashcard } from "../src/lib/flashcards.ts";
 import { useProgress } from "../src/state/ProgressContext.tsx";
-import { dayKey, dueCards, newCardAllowance, review } from "../src/lib/leitner.ts";
+import { dayKey, dueCards, newCardAllowance, newPerDay, NEW_PER_DAY_OPTIONS, review } from "../src/lib/leitner.ts";
 
 interface Props {
-  vocab: VocabEntry[];
+  cards: Flashcard[];
+  decks: DeckOption[];
 }
 
-function front(v: VocabEntry): { main: string; ask: string } {
-  if (v.article && v.noun) return { main: `___ ${v.noun}`, ask: v.plural ? "Article and plural?" : "Article?" };
-  if (/·/.test(v.forms) || /hat |ist /.test(v.forms)) return { main: v.term, ask: "Which forms? (er/sie, perfect tense)" };
-  return { main: v.term, ask: "Meaning, or an example sentence?" };
-}
-
-export default function Cards({ vocab }: Props) {
+export default function Cards({ cards, decks }: Props) {
   const { progress, update } = useProgress();
+  const [deck, setDeck] = useState("all");
   const [queue, setQueue] = useState<string[] | null>(null);
   const [flipped, setFlipped] = useState(false);
   const [stats, setStats] = useState({ ok: 0, bad: 0 });
   const [requeued, setRequeued] = useState<Set<string>>(new Set());
-  const byId = new Map(vocab.map((v) => [v.id, v]));
+  const byId = new Map(cards.map((c) => [c.id, c]));
+  const inDeck = (id: string) => deck === "all" || byId.get(id)?.deck === deck;
   const today = dayKey(new Date());
-  const due = dueCards(progress.cards, today).filter((id) => byId.has(id));
+  const allDue = dueCards(progress.cards, today).filter((id) => byId.has(id));
+  const due = allDue.filter(inDeck);
+  const limit = newPerDay(progress.settings);
   const introduced = progress.newCards.day === today ? progress.newCards.count : 0;
-  const allowance = newCardAllowance(due.length, introduced);
+  const allowance = newCardAllowance(allDue.length, introduced, limit);
+  const unseen = newCardOrder(cards, deck).filter((c) => !progress.cards[c.id]);
+  const fresh = unseen.slice(0, allowance);
+  const started = (id: string) => cards.filter((c) => c.deck === id && progress.cards[c.id]).length;
 
   const start = () => {
-    const fresh = vocab.filter((v) => !progress.cards[v.id]).slice(0, allowance).map((v) => v.id);
-    setQueue([...due, ...fresh]);
+    setQueue([...due, ...fresh.map((c) => c.id)]);
     setStats({ ok: 0, bad: 0 });
     setRequeued(new Set());
     setFlipped(false);
   };
+
+  const setLimit = (value: number) => update((p) => ({ ...p, settings: { ...p.settings, newPerDay: value } }));
 
   const current = queue?.[0] ? byId.get(queue[0]) : undefined;
 
@@ -63,23 +68,55 @@ export default function Cards({ vocab }: Props) {
         Say it aloud first, then turn the card over. Be honest: this only helps you. Correct → next box (1, 3, 7, 14, 30 days). Wrong → back to box 1.
       </p>
       {!queue ? (
-        <section className="card">
-          <p>
-            Today: <strong>{due.length}</strong> due cards, <strong>{allowance}</strong> new allowed.
-          </p>
-          {allowance === 0 && due.length * 20 > 15 * 60 ? <p className="feedback hint">Lots of due cards: no new words today. Old ones first.</p> : null}
-          <button type="button" onClick={start} disabled={due.length + allowance === 0}>
-            Start
-          </button>
-          {due.length + allowance === 0 ? <p className="muted">All done for today. Well done!</p> : null}
-        </section>
+        <>
+          <section className="card">
+            <div className="deck-controls">
+              <label>
+                <span>Deck</span>
+                <select value={deck} onChange={(e) => setDeck(e.target.value)}>
+                  <option value="all">All decks mixed ({cards.length} cards)</option>
+                  {decks.map((d) => (
+                    <option key={d.id} value={d.id}>{d.title} ({started(d.id)}/{d.total})</option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                <span>New cards per day</span>
+                <select value={limit} onChange={(e) => setLimit(Number(e.target.value))}>
+                  {NEW_PER_DAY_OPTIONS.map((n) => <option key={n} value={n}>{n}</option>)}
+                </select>
+              </label>
+            </div>
+            <p>
+              Today: <strong>{due.length}</strong> due cards, <strong>{fresh.length}</strong> new {deck === "all" ? "from all decks" : "from this deck"}.
+              {" "}<span className="muted">{unseen.length} not started yet.</span>
+            </p>
+            {allowance === 0 && allDue.length * 20 > 15 * 60 ? <p className="feedback hint">Lots of due cards: no new words today. Old ones first.</p> : null}
+            <button type="button" onClick={start} disabled={due.length + fresh.length === 0}>
+              Start
+            </button>
+            {due.length + fresh.length === 0 ? <p className="muted">{unseen.length === 0 ? "You have started every card in this deck." : "All done for today. Well done!"}</p> : null}
+          </section>
+          <section className="card">
+            <h2>Decks</h2>
+            <ul className="deck-list">
+              {decks.map((d) => (
+                <li key={d.id}>
+                  <span>{d.title}</span>
+                  <meter min={0} max={d.total} value={started(d.id)} aria-label={`${d.title} started`} />
+                  <span className="muted">{started(d.id)}/{d.total}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        </>
       ) : current ? (
         <section className="card flashcard" aria-live="polite">
           <p className="muted">
-            Topic {current.week} · {queue.length} cards left
+            {current.label} · {queue.length} cards left
           </p>
-          <p className="big" lang="de">{front(current).main}</p>
-          <p>{front(current).ask}</p>
+          <p className="big" lang={current.frontLang}>{current.front}</p>
+          <p>{current.ask}</p>
           {!flipped ? (
             <button type="button" onClick={() => setFlipped(true)}>
               Turn over
@@ -87,11 +124,11 @@ export default function Cards({ vocab }: Props) {
           ) : (
             <>
               <div className="back" lang="de">
-                <p className="big">{current.term}</p>
-                <p lang="en"><strong>{current.meaning}</strong></p>
+                <p className="big">{current.back}</p>
+                {current.meaning ? <p lang="en"><strong>{current.meaning}</strong></p> : null}
                 {current.forms ? <p>{current.forms}</p> : null}
                 {current.example ? <p className="muted">{current.example}</p> : null}
-                <p className="muted" lang="en">{current.exampleEn}</p>
+                {current.exampleEn ? <p className="muted" lang="en">{current.exampleEn}</p> : null}
               </div>
               <div className="row">
                 <button type="button" onClick={() => grade(true)}>
@@ -119,4 +156,12 @@ export default function Cards({ vocab }: Props) {
   );
 }
 
-export const getServerSideProps = protect<Props>(() => ({ props: { vocab: loadCourse().vocab } }));
+export const getServerSideProps = protect<Props>(() => {
+  const topic = loadCourse().vocab.map(fromVocab);
+  const knowledge = fromKnowledge(KNOWLEDGE_DECKS);
+  const decks: DeckOption[] = [
+    { id: TOPIC_DECK, title: "Topic vocabulary", total: topic.length },
+    ...KNOWLEDGE_DECKS.map((d) => ({ id: d.id, title: d.title, total: d.cards.length })),
+  ];
+  return { props: { cards: [...topic, ...knowledge], decks } };
+});

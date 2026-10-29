@@ -1,5 +1,6 @@
 import type { Category } from "./types.ts";
 import type { CardState } from "./leitner.ts";
+import { NEW_PER_DAY_OPTIONS } from "./leitner.ts";
 import type { ItemState, Status } from "./grade.ts";
 
 export const STORAGE_KEY = "sprungbrett.progress";
@@ -40,7 +41,7 @@ export interface Progress {
   canDo: Record<string, number[]>;
   mistakes: { tag: Category; at: number }[];
   days: string[];
-  settings: { english: boolean };
+  settings: { english: boolean; newPerDay?: number };
 }
 
 export function emptyProgress(): Progress {
@@ -124,6 +125,8 @@ export function validateProgress(x: unknown): Progress {
   });
   if (!Array.isArray(x.days) || x.days.length > MAX_DAYS || !x.days.every((d) => typeof d === "string" && DAY.test(d))) fail("days is invalid");
   if (!isObject(x.settings) || typeof x.settings.english !== "boolean") fail("settings is invalid");
+  const perDay = x.settings.newPerDay;
+  if (perDay !== undefined && !(NEW_PER_DAY_OPTIONS as readonly unknown[]).includes(perDay)) fail("settings.newPerDay is invalid");
   return {
     version: SCHEMA_VERSION,
     items,
@@ -134,7 +137,7 @@ export function validateProgress(x: unknown): Progress {
     canDo,
     mistakes,
     days: [...new Set(x.days as string[])],
-    settings: { english: x.settings.english as boolean },
+    settings: { english: x.settings.english as boolean, ...(typeof perDay === "number" ? { newPerDay: perDay } : {}) },
   };
 }
 

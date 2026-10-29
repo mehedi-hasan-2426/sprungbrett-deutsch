@@ -15,7 +15,7 @@ export function protect<Props extends object>(loader: (context: GetServerSidePro
     }
     const result = await loader(context);
     if (!("props" in result)) return result;
-    const courseNav = loadCourse().weeks.map((unit, index) => ({ n: index + 1, title: unit.title, sections: unit.sections.map(({ id, title, role }) => ({ id, title, role })) }));
+    const courseNav = loadCourse().weeks.map((unit, index) => ({ n: index + 1, title: unit.title, total: Object.keys(unit.items).length, sections: unit.sections.map(({ id, title, role }) => ({ id, title, role })) }));
     return { props: { ...await result.props, session, courseNav } };
   };
 }
