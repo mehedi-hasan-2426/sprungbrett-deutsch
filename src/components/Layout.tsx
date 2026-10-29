@@ -45,14 +45,14 @@ export function Layout({ children, title }: { children: ReactNode; title?: strin
   return (
     <>
       <Head>
-        <title>{title ? `${title} · Sprungbrett` : "Sprungbrett · German A1 → A2"}</title>
+        <title>{title ? `${title} · Sprungbrett` : "Sprungbrett · Deutsch lernen"}</title>
       </Head>
       <a className="skip" href="#main">
         Skip to content
       </a>
       <header className="top">
         <Link href="/" className="brand">
-          Sprungbrett <span className="brand-tag">A1 → A2</span>
+          Sprungbrett <span className="brand-tag">Deutsch</span>
         </Link>
         <nav aria-label="Main navigation">
           {NAV.map((n) => (

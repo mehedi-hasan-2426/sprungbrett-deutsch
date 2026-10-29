@@ -30,6 +30,14 @@ export const ROLE_LABEL: Record<string, string> = {
   other: "Checkpoint",
 };
 
+export const STAGES = [
+  { n: 1, title: "Stage 1", topics: [1, 2, 3, 4], checkpoint: 1 },
+  { n: 2, title: "Stage 2", topics: [5, 6, 7, 8], checkpoint: 2 },
+  { n: 3, title: "Stage 3", topics: [9, 10, 11, 12], checkpoint: 3 },
+] as const;
+
+export const stageOf = (topic: number) => STAGES.find((s) => (s.topics as readonly number[]).includes(topic));
+
 export function weekTitle(title: string): { german: string; english: string } {
   const m = title.match(/^(?:Week|Topic) \d+: (.+?)(?: \(([^)]*)\))?(?: · .*)?$/);
   return { german: m?.[1] ?? title, english: m?.[2] ?? "" };

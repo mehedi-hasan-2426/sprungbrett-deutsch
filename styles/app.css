@@ -321,7 +321,17 @@ summary { cursor: pointer; color: var(--accent); }
 .is-current .path-dot { background: var(--action); color: var(--action-fg); }
 .is-current .path-percent { color: var(--accent); }
 .path-more { border-top: 1px solid var(--line); padding: 0.75rem 0; margin: 0; max-width: 40rem; }
-.path-more summary { font-weight: 600; min-height: 44px; display: flex; align-items: center; color: var(--fg); }
+.path-stage { max-width: 40rem; margin: 0 0 1.75rem; }
+.path-stage-title { display: flex; align-items: baseline; gap: 0.75rem; font-size: 1.15rem; margin: 0 0 0.5rem; }
+.path-stage-title .muted { font-family: var(--sans); font-size: 0.85rem; font-weight: 500; }
+.path-stage .path { margin-bottom: 0; }
+.side-stage { margin: 0.75rem 0 0.35rem; padding: 0 0.5rem; font-size: 0.78rem; font-weight: 600; color: var(--muted); }
+.level-picker { display: grid; grid-template-columns: 1fr 1fr; gap: 0.25rem; padding: 0.25rem; margin: 0 0 0.75rem; border: 1px solid var(--line); border-radius: 100px; background: var(--card); }
+.sidebar .level-option { margin: 0; min-height: 40px; border: 0; background: transparent; color: var(--muted); }
+.sidebar .level-option:hover { background: var(--tint); color: var(--fg); }
+.sidebar .level-option.is-active, .sidebar .level-option.is-active:hover { background: var(--action); color: var(--action-fg); }
+.level-soon { padding: 0.75rem 0.5rem; border-top: 1px solid var(--line); }
+.level-soon p { margin: 0 0 0.5rem; }.path-more summary { font-weight: 600; min-height: 44px; display: flex; align-items: center; color: var(--fg); }
 .path-guides { display: flex; flex-wrap: wrap; gap: 0.5rem; list-style: none; padding: 0; margin: 0.5rem 0 0; }
 .path-guides a { display: inline-flex; align-items: center; min-height: 40px; padding: 0 1rem; border: 1px solid var(--line); border-radius: 100px; color: var(--fg); text-decoration: none; font-size: 0.9rem; }
 .path-guides a:hover { background: var(--tint); }

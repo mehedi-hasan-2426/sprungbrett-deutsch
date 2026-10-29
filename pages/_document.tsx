@@ -5,7 +5,7 @@ export default function Document() {
   return (
     <Html lang="en">
       <Head>
-        <meta name="description" content="Practise German from A1 to A2 with instant feedback. No account, no tracking." />
+        <meta name="description" content="Practise German step by step with instant feedback. Sign in to save progress or try it as a guest." />
         <meta name="color-scheme" content="light dark" />
         <meta name="referrer" content="no-referrer" />
         <Script src="/appearance.js" strategy="beforeInteractive" defer={false} />
