@@ -118,7 +118,7 @@ export function Sidebar() {
                 <div className="side-topic-row">
                   <Link href={`/woche/${w.n}`} className="side-topic-link" aria-current={path === `/woche/${w.n}` ? "page" : undefined} onClick={() => setOpen(false)}>
                     <span className="side-topic-title">{weekTitle(w.title).german}</span>
-                    <span className={percent ? "side-percent started" : "side-percent"}>{percent}%</span>
+                    <span key={percent} className={percent ? "side-percent started" : "side-percent"}>{percent}%</span>
                   </Link>
                   {q ? null : (
                     <button type="button" className="side-chevron" aria-expanded={expanded} aria-controls={listId} aria-label={`${expanded ? "Hide" : "Show"} lessons in ${weekTitle(w.title).german}`} onClick={() => setToggled({ ...toggled, [w.n]: !expanded })}>

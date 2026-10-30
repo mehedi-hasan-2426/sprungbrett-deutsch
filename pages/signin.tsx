@@ -40,7 +40,7 @@ export default function SignIn({ configured, denied }: { configured: boolean; de
       <Head><title>Sign in · Sprungbrett</title><meta name="robots" content="noindex" /></Head>
       <div className="signin-content">
         <p className="signin-brand">Sprungbrett</p>
-        <h1>Deutsch lernen.<br />Schritt für Schritt.</h1>
+        <h1 className="accent-heading">Deutsch lernen.<br />Schritt für Schritt.</h1>
         <p className="signin-intro">Sign in to save your progress, or start learning as a guest.</p>
         {!configured ? <p role="status">Google sign-in is unavailable. You can still continue as a guest.</p> : null}
         {denied ? <p role="alert">Sign-in failed or this account is not approved. Try an approved Google account or continue as a guest.</p> : null}

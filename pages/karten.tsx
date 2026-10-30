@@ -111,7 +111,7 @@ export default function Cards({ cards, decks }: Props) {
           </section>
         </>
       ) : current ? (
-        <section className="card flashcard" aria-live="polite">
+        <section key={current.id} className="card flashcard" aria-live="polite">
           <p className="muted">
             {current.label} · {queue.length} cards left
           </p>

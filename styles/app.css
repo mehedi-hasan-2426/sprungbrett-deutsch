@@ -88,6 +88,11 @@
   color-scheme: dark;
 }
 
+:root {
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+}
+
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
 body { margin: 0; background: var(--bg); color: var(--fg); line-height: 1.6; font-size: 1.0625rem; }
@@ -117,7 +122,7 @@ main[id], section[id], h3[id] { scroll-margin-top: 5rem; }
 .signin { width: min(100%, 36rem); margin: 4rem auto; padding: 1.5rem; }
 .signin-screen { display: grid; place-items: center; min-height: 100svh; max-width: none; margin: 0; padding: 2rem 1.25rem; }
 .signin-content { width: 100%; max-width: 440px; text-align: center; }
-.signin-brand { margin: 0 0 2rem; font-size: 1.15rem; font-weight: 600; }
+.signin-brand { margin: 0 0 1.5rem; font-size: 1.15rem; font-weight: 600; }
 .signin-content h1 { margin: 0; font-size: 2.5rem; line-height: 1.15; letter-spacing: 0; }
 .signin-intro { margin: 1rem 0 1.75rem; color: var(--muted); font-size: 1rem; }
 .signin-actions { display: grid; gap: 0.75rem; }
@@ -226,8 +231,9 @@ button, .button {
   display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem; font: inherit; font-weight: 600; font-size: 0.95rem; line-height: 1.2;
   border: 1px solid var(--action-line); background: var(--action); color: var(--action-fg);
   border-radius: 100px; padding: 0.55rem 1.25rem; min-height: 44px; cursor: pointer; text-decoration: none; margin: 0.25rem 0.25rem 0.25rem 0;
-  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s, transform 160ms var(--ease-out);
 }
+button:not(:disabled):active, .button:active { transform: scale(0.97); }
 button:hover, .button:hover { background: var(--action-hover); }
 button.secondary, .button.secondary, .option { background: transparent; color: var(--fg); border-color: var(--line); }
 button.secondary:hover, .button.secondary:hover, .option:hover { background: var(--tint); border-color: var(--fg); }
@@ -365,7 +371,22 @@ summary { cursor: pointer; color: var(--accent); }
 .path-step:nth-child(8) { animation-delay: 280ms; } .path-step:nth-child(n+9) { animation-delay: 320ms; }
 @keyframes path-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 
+.signin-content > * { animation: rise-in 300ms var(--ease-out) both; }
+.signin-content > :nth-child(2) { animation-delay: 50ms; }
+.signin-content > :nth-child(3) { animation-delay: 100ms; }
+.signin-content > :nth-child(n+4) { animation-delay: 150ms; }
+.flashcard, .back, .item .feedback { animation: rise-in 200ms var(--ease-out) both; }
+.side-percent.started { animation: fade-in 200ms var(--ease-out); }
+.accent-heading::after { content: ""; display: block; width: 4rem; height: 3px; margin-top: 0.6rem; border-radius: 3px; background: var(--action-line); animation: line-reveal 600ms var(--ease-in-out) 150ms both; }
+.signin-content .accent-heading::after { margin: 0.9rem auto 0; animation-name: line-reveal-center; }
+@keyframes rise-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes line-reveal { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0); } }
+@keyframes line-reveal-center { from { clip-path: inset(0 50%); } to { clip-path: inset(0); } }
+
 @media (prefers-reduced-motion: reduce) {
-  .path-step { animation: none; }
+  .path-step, .accent-heading::after { animation: none; }
+  .signin-content > *, .flashcard, .back, .item .feedback, .side-percent.started { animation: fade-in 150ms ease both; }
+  button:not(:disabled):active, .button:active { transform: none; }
   * { scroll-behavior: auto !important; transition: none !important; }
 }
