@@ -61,7 +61,7 @@ export default function Plan({ doc, weeks, placementIds }: Props) {
     <Layout title="Learning path">
       <header className="path-head">
         <div>
-          <h1>{doc.title}</h1>
+          <h1 className="accent-heading">{doc.title}</h1>
           <p className="muted">Twelve everyday topics at your own pace. Finish a topic&apos;s review quiz to move on.</p>
         </div>
         {current ? (
