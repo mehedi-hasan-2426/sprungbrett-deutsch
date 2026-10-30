@@ -1,10 +1,10 @@
 import type { Course } from "../lib/types.ts";
 import { parseInline } from "../lib/inline.ts";
 
-type Task = [kind: "sms" | "mail", prompt: string, model: string];
+type Task = [kind: "sms" | "mail" | "text", prompt: string, model: string];
 
-const RANGE = { sms: [20, 30], mail: [30, 40] } as const;
-const LABEL = { sms: "Kurze Nachricht (20–30 Wörter)", mail: "E-Mail (30–40 Wörter)" } as const;
+const RANGE = { sms: [20, 30], mail: [30, 40], text: [40, 60] } as const;
+const LABEL = { sms: "Kurze Nachricht (20–30 Wörter)", mail: "E-Mail (30–40 Wörter)", text: "Freier Text (40–60 Wörter)" } as const;
 
 export const EXTRA_WRITING: Record<number, Task[]> = {
   1: [
@@ -82,6 +82,23 @@ export const EXTRA_WRITING: Record<number, Task[]> = {
 };
 
 export const isExtraWriting = (id: string) => /-wr-x\d+$/.test(id);
+
+const TEXTS: Record<number, Task> = {
+  1: ["text", "Forumsbeitrag. Im Forum „Deutsch im Alltag“ fragen Leute: „Wie sieht dein Morgen aus?“ Schreiben Sie: · Wann stehen Sie auf? · Was machen Sie vor der Arbeit? · Was gefällt Ihnen am Morgen nicht?", "Ich stehe meistens um halb sieben auf. Zuerst trinke ich einen Kaffee, dann dusche ich und ziehe mich an. Um halb acht fahre ich mit dem Fahrrad zur Arbeit. Das ist schön, wenn die Sonne scheint. Was ich nicht mag: Der Wecker klingelt immer zu früh, besonders im Winter!"],
+  2: ["text", "Kommentar. In einem Blog steht: „Selbst kochen ist zu teuer und dauert zu lange.“ Schreiben Sie einen Kommentar: · Was denken Sie? (Ich finde, dass …) · Was kochen Sie gern? · Geben Sie einen Tipp.", "Ich finde nicht, dass Kochen zu Hause teuer ist. Gemüse vom Markt kostet wenig, und eine große Suppe reicht für drei Tage. Ich koche gern Linsen mit Reis, das dauert nur 30 Minuten. Mein Tipp: Kochen Sie am Sonntag mehr und nehmen Sie das Essen am Montag mit zur Arbeit."],
+  3: ["text", "Anzeige. Sie ziehen um und verkaufen Ihr Sofa. Schreiben Sie eine Anzeige für das Schwarze Brett: · Wie sieht das Sofa aus? · Wie alt ist es und was kostet es? · Wann kann man es ansehen?", "Sofa zu verkaufen! Ich ziehe Ende Mai um und verkaufe mein graues Sofa. Es ist drei Jahre alt, zwei Meter lang und sehr bequem. Für zwei Personen ist genug Platz. Preis: 120 Euro. Sie können das Sofa am Samstag zwischen 10 und 14 Uhr ansehen. Bitte rufen Sie mich an: 0151 2345678."],
+  4: ["text", "Blogbeitrag. Schreiben Sie über einen schönen Tag im letzten Monat: · Wo waren Sie? · Was haben Sie gemacht? · Was war besonders schön?", "Letzten Sonntag bin ich mit meiner Schwester an den Rhein gefahren. Wir haben Fahrräder gemietet und sind fast 30 Kilometer gefahren. Mittags haben wir auf einer Wiese gepicknickt. Besonders schön war der Sonnenuntergang am Abend. Wir haben viele Fotos gemacht und sind erst um neun Uhr nach Hause gekommen."],
+  5: ["text", "Antwort im Forum. Kemal schreibt: „Ich schlafe schlecht und bin immer müde. Was soll ich tun?“ Antworten Sie: · Zeigen Sie Verständnis. · Geben Sie zwei Tipps (Du solltest …). · Wünschen Sie ihm alles Gute.", "Hallo Kemal,\ndas kenne ich gut, ich hatte das Problem letztes Jahr auch. Du solltest abends keinen Kaffee trinken und das Handy eine Stunde vor dem Schlafen weglegen. Außerdem solltest du jeden Tag einen Spaziergang machen. Das hat mir sehr geholfen. Ich wünsche dir bald ruhige Nächte!\nGruß, Paula"],
+  6: ["text", "Postkarte. Sie besuchen eine Stadt in Deutschland. Schreiben Sie Ihrem Freund Malik: · Wo sind Sie und wie lange? · Was haben Sie schon gesehen? · Was machen Sie morgen?", "Lieber Malik,\nviele Grüße aus Dresden! Ich bin seit Montag hier und bleibe bis Freitag. Gestern habe ich die Frauenkirche besichtigt und bin an der Elbe spazieren gegangen. Die Altstadt ist wunderschön, aber sehr voll. Morgen fahre ich mit dem Schiff nach Pillnitz.\nBis bald, deine Rosa"],
+  7: ["text", "Text für eine Online-Zeitung zum Thema „Mein Arbeitstag“. Schreiben Sie: · Was sind Sie von Beruf? · Was machen Sie bei der Arbeit? · Was gefällt Ihnen, was nicht?", "Ich bin Busfahrerin in Leipzig. Meine Schicht beginnt oft schon um fünf Uhr. Ich fahre jeden Tag dieselbe Linie durch die Stadt, deshalb kenne ich viele Fahrgäste. Mir gefällt, dass ich mit Menschen zu tun habe. Nicht so gut finde ich den Verkehr am Nachmittag, weil ich dann oft zu spät bin."],
+  8: ["text", "Glückwunschkarte. Ihre Kollegin Svenja heiratet, aber Sie können nicht zur Feier kommen. Schreiben Sie ihr: · Gratulieren Sie. · Warum können Sie nicht kommen? · Was schenken Sie und warum?", "Liebe Svenja,\nherzlichen Glückwunsch zur Hochzeit! Ich wünsche euch beiden alles Gute und viel Glück. Leider kann ich am Samstag nicht kommen, weil ich bei meiner Mutter in Polen bin. Ich schenke euch einen Gutschein für ein Abendessen, denn ihr esst doch so gern italienisch. Feiert schön!\nDeine Agnieszka"],
+  9: ["text", "Einladung. Sie feiern Ihren 30. Geburtstag. Schreiben Sie Ihren Freunden: · Wann und wo ist die Feier? · Was gibt es? · Was sollen die Gäste mitbringen oder tun?", "Liebe Freunde,\nich werde 30 und möchte das mit euch feiern! Die Party ist am Samstag, dem 12. Juli, ab 19 Uhr in meinem Garten. Es gibt Grillwürstchen, Salate und Musik. Bringt bitte gute Laune und eure Lieblingslieder mit. Sagt mir bis Mittwoch Bescheid, ob ihr kommt.\nEure Selin"],
+  10: ["text", "Hotelbewertung. Sie waren drei Nächte in einem Hotel. Schreiben Sie eine Bewertung im Internet: · Was war gut? · Was war nicht so gut? · Empfehlen Sie das Hotel weiter?", "Wir waren drei Nächte im Hotel Möwe in Kiel. Das Zimmer war sauber und hell, und vom Balkon konnten wir das Meer sehen. Das Frühstück war sehr gut. Leider war das WLAN langsam, und abends war es auf der Straße laut. Trotzdem empfehle ich das Hotel weiter, besonders für Familien."],
+  11: ["text", "Beschwerde. Ihr Paket ist nicht angekommen. Schreiben Sie an den Paketdienst: · Was haben Sie wann bestellt? · Was ist passiert? · Was soll der Paketdienst tun?", "Sehr geehrte Damen und Herren,\nam 2. Oktober habe ich ein Paket mit Büchern bestellt. Laut Sendungsverfolgung ist es am 5. Oktober angekommen, aber ich habe es nicht bekommen. Auch meine Nachbarn haben es nicht. Bitte prüfen Sie, wo das Paket ist, und informieren Sie mich.\nMit freundlichen Grüßen\nMira Hoffmann"],
+  12: ["text", "Forumsbeitrag. Im Forum „Deutsch lernen“ fragt jemand: „Wie lernt ihr am besten?“ Schreiben Sie: · Wie lange lernen Sie schon Deutsch? · Was hilft Ihnen am meisten? · Was ist für Sie noch schwer?", "Ich lerne seit einem Jahr Deutsch. Am meisten helfen mir Karteikarten, weil ich sie überall üben kann, zum Beispiel im Bus. Außerdem höre ich jeden Abend einen deutschen Podcast. Schwer finde ich noch die Artikel: der, die oder das? Und manchmal verstehe ich die Leute nicht, wenn sie schnell sprechen."],
+};
+
+for (const [n, task] of Object.entries(TEXTS)) EXTRA_WRITING[Number(n)]?.push(task);
 
 export function addWritingPractice(course: Course): Course {
   course.weeks.forEach((unit, index) => {

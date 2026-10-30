@@ -20,19 +20,19 @@ test("every topic has at least five writing tasks with unique, valid ids", () =>
   }
 });
 
-test("extra model texts stay inside their word range and answer with a greeting", () => {
+test("extra model texts stay inside their word range; messages and e-mails open with a greeting", () => {
   for (const unit of course.weeks) {
     for (const task of unit.writing.filter((t) => isExtraWriting(t.id))) {
       const n = words(task.model);
       assert.ok(n >= task.min && n <= task.max, `${task.id}: ${n} words, expected ${task.min}-${task.max}`);
-      assert.match(task.model, /^(Hallo|Hi|Liebe|Lieber|Sehr geehrte)/, task.id);
+      if (task.max <= 40) assert.match(task.model, /^(Hallo|Hi|Liebe|Lieber|Sehr geehrte)/, task.id);
     }
   }
 });
 
-test("each topic gets two short messages and two e-mails", () => {
+test("each topic gets two short messages, two e-mails and one free text", () => {
   for (let n = 1; n <= 12; n++) {
     const kinds = (EXTRA_WRITING[n] ?? []).map(([kind]) => kind).sort();
-    assert.deepEqual(kinds, ["mail", "mail", "sms", "sms"], `topic ${n}`);
+    assert.deepEqual(kinds, ["mail", "mail", "sms", "sms", "text"], `topic ${n}`);
   }
 });
