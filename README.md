@@ -1,6 +1,12 @@
-# Sprungbrett · Deutsch A1 → A2
+<p align="center"><img src="public/apple-touch-icon.png" width="96" alt="Sprungbrett logo" /></p>
 
-A privacy-first web app for practising German from A1 to A2, with instant feedback.
+# Sprungbrett
+
+A web app for practising German at A2 level, with instant feedback.
+Try it at [sprung.mehedihasanrahib.de](https://sprung.mehedihasanrahib.de).
+
+![Sprungbrett sign-in page with the Cologne skyline](public/og-image.jpg)
+
 It turns a self-paced course (placement test, everyday topics, checkpoints) into
 interactive exercises. Continue as a guest without an account: guest answers and
 progress stay only in this browser, separately from account progress. Cloud sync
@@ -45,9 +51,27 @@ meaning, forms, and an original German example with an English translation.
 - **Short day** mode (15 minutes), study streak, JSON export and import.
 - **Account progress sync**: debounced automatic saves, offline local copies, an
    explicit device/cloud choice on conflicts, and a recoverable copy before replacement.
-- **Appearance**: Light, Dark or System in the course header and sign-in page.
-   System follows device colour-scheme changes. The preference is kept on this
-   browser when storage is available, separately from account progress.
+- **Appearance**: a light/dark switch in the course header. Until you choose,
+   the site follows your device setting. The choice is kept in this browser,
+   separately from progress.
+- **Umlaut keys**: ä, ö, ü and ß buttons next to typed answers, for phones
+   without a German keyboard.
+
+## Look and motion
+
+The logo is three tilted bars in black, red and gold next to the word
+Sprungbrett. The sign-in page uses a photo of the Cologne skyline at dusk.
+
+Motion is plain CSS, with no animation library:
+
+- the sign-in card fades in, and a gold line draws under the headline
+- buttons shrink slightly when pressed
+- flashcards flip over when you turn them
+- answer feedback slides in after "Check"
+- the theme switch slides between a sun and a moon
+
+If your device asks for reduced motion, slides and flips are replaced by short
+fades.
 
 ## Run locally
 

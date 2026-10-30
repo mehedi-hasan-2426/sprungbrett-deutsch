@@ -6,7 +6,7 @@ import { getServerSession } from "next-auth/next";
 import { authConfigured, authOptions } from "../src/server/auth.ts";
 import type { CourseSession } from "../src/server/auth.ts";
 import { canAccess } from "../src/lib/access.ts";
-import { AppearancePicker } from "../src/components/AppearancePicker.tsx";
+import { Logo } from "../src/components/Logo.tsx";
 
 export default function SignIn({ configured, denied }: { configured: boolean; denied: boolean }) {
   const [pending, setPending] = useState(false);
@@ -39,7 +39,7 @@ export default function SignIn({ configured, denied }: { configured: boolean; de
     <main className="signin-screen">
       <Head><title>Sign in · Sprungbrett</title><meta name="robots" content="noindex" /></Head>
       <div className="signin-content">
-        <p className="signin-brand">Sprungbrett</p>
+        <p className="signin-brand"><Logo /></p>
         <h1 className="accent-heading">Deutsch lernen.<br />Schritt für Schritt.</h1>
         <p className="signin-intro">Sign in to save your progress, or start learning as a guest.</p>
         {!configured ? <p role="status">Google sign-in is unavailable. You can still continue as a guest.</p> : null}
@@ -51,7 +51,6 @@ export default function SignIn({ configured, denied }: { configured: boolean; de
           <button type="button" className="secondary" disabled={guestPending} onClick={enterGuest}>{guestPending ? "Opening lessons..." : "Continue as guest"}</button>
         </div>
         <p className="signin-note">No account needed to try it. Guest progress stays only in this browser.</p>
-        <div className="signin-appearance"><AppearancePicker /></div>
       </div>
     </main>
   );

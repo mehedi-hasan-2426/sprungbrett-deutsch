@@ -1,4 +1,4 @@
-import { useId, useState } from "react";
+import { useId, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import type { Item } from "../lib/types.ts";
 import { gradeItem, step } from "../lib/grade.ts";
@@ -14,6 +14,8 @@ const NOTE_TEXT: Record<Note, string> = {
   case: "Tip: German nouns and the first word of a sentence start with a capital letter.",
   punctuation: "Tip: compare the commas and punctuation with the model answer.",
 };
+
+const SPECIAL = ["ä", "ö", "ü", "ß"];
 
 function Prompt({ text, blanks, values, setValue, disabled, label }: { text: string; blanks: number; values: string[]; setValue: (k: number, v: string) => void; disabled: boolean; label: string }) {
   const pieces = text.split(/(___|…)/);
@@ -81,6 +83,21 @@ export function ItemView({ item }: { item: Item }) {
   };
 
   const setValue = (k: number, v: string) => setDraft((prev) => Object.assign([...(prev ?? values)], { [k]: v }));
+  const lastInput = useRef<HTMLInputElement | null>(null);
+  const insertSpecial = (form: HTMLFormElement | null, char: string) => {
+    const inputs = form ? [...form.querySelectorAll<HTMLInputElement>("input")] : [];
+    const input = lastInput.current && inputs.includes(lastInput.current) ? lastInput.current : inputs[0];
+    if (!input) return;
+    const k = inputs.indexOf(input);
+    const start = input.selectionStart ?? input.value.length;
+    const end = input.selectionEnd ?? start;
+    const next = (input.value.slice(0, start) + char + input.value.slice(end)).slice(0, MAX_ANSWER_LENGTH);
+    setValue(k, next);
+    requestAnimationFrame(() => {
+      input.focus();
+      input.setSelectionRange(start + 1, start + 1);
+    });
+  };
   const reset = () => {
     setDraft(null);
     setNotes([]);
@@ -189,7 +206,7 @@ export function ItemView({ item }: { item: Item }) {
   }
 
   return (
-    <form className="item" onSubmit={submit} aria-describedby={id}>
+    <form className="item" onSubmit={submit} aria-describedby={id} onFocusCapture={(e) => { if (e.target instanceof HTMLInputElement) lastInput.current = e.target; }}>
       <p>
         {difficulty} <span className="num">{item.n}.</span>{" "}
         <Prompt text={item.prompt} blanks={item.blanks} values={values} setValue={setValue} disabled={done} label={label} />
@@ -199,6 +216,13 @@ export function ItemView({ item }: { item: Item }) {
       ) : null}
       <div className="row">
         {!done ? <button type="submit">Check</button> : null}
+        {!done ? (
+          <span className="special-keys" role="group" aria-label="German letters">
+            {SPECIAL.map((c) => (
+              <button key={c} type="button" className="special-key" aria-label={`Insert ${c}`} onMouseDown={(e) => e.preventDefault()} onClick={(e) => insertSpecial(e.currentTarget.form, c)}>{c}</button>
+            ))}
+          </span>
+        ) : null}
         {state.status === "hint" ? (
           <button type="button" className="link" onClick={() => answer(false)}>Show answer</button>
         ) : null}

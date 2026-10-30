@@ -115,30 +115,32 @@ export default function Cards({ cards, decks }: Props) {
           <p className="muted">
             {current.label} · {queue.length} cards left
           </p>
-          <p className="big" lang={current.frontLang}>{current.front}</p>
-          <p>{current.ask}</p>
+          <div className={flipped ? "flip is-flipped" : "flip"}>
+            <div className="flip-face flip-front" aria-hidden={flipped} inert={flipped}>
+              <p className="big" lang={current.frontLang}>{current.front}</p>
+              <p>{current.ask}</p>
+            </div>
+            <div className="flip-face flip-back" lang="de" aria-hidden={!flipped} inert={!flipped}>
+              <p className="big">{current.back}</p>
+              {current.meaning ? <p lang="en"><strong>{current.meaning}</strong></p> : null}
+              {current.forms ? <p>{current.forms}</p> : null}
+              {current.example ? <p className="muted">{current.example}</p> : null}
+              {current.exampleEn ? <p className="muted" lang="en">{current.exampleEn}</p> : null}
+            </div>
+          </div>
           {!flipped ? (
             <button type="button" onClick={() => setFlipped(true)}>
               Turn over
             </button>
           ) : (
-            <>
-              <div className="back" lang="de">
-                <p className="big">{current.back}</p>
-                {current.meaning ? <p lang="en"><strong>{current.meaning}</strong></p> : null}
-                {current.forms ? <p>{current.forms}</p> : null}
-                {current.example ? <p className="muted">{current.example}</p> : null}
-                {current.exampleEn ? <p className="muted" lang="en">{current.exampleEn}</p> : null}
-              </div>
-              <div className="row">
-                <button type="button" onClick={() => grade(true)}>
-                  I knew it
-                </button>
-                <button type="button" className="secondary" onClick={() => grade(false)}>
-                  I didn't know it
-                </button>
-              </div>
-            </>
+            <div className="row">
+              <button type="button" onClick={() => grade(true)}>
+                I knew it
+              </button>
+              <button type="button" className="secondary" onClick={() => grade(false)}>
+                I didn't know it
+              </button>
+            </div>
           )}
         </section>
       ) : (
