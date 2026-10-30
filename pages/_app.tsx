@@ -1,5 +1,6 @@
 import type { AppProps } from "next/app";
 import Link from "next/link";
+import Head from "next/head";
 import "../styles/app.css";
 import { ProgressProvider } from "../src/state/ProgressContext.tsx";
 import { SessionProvider, useSession } from "next-auth/react";
@@ -27,5 +28,10 @@ function CourseApp({ Component, pageProps, router }: AppProps<PageProps>) {
 }
 
 export default function App(props: AppProps<PageProps>) {
-  return <SessionProvider session={props.pageProps.session} refetchInterval={60} refetchOnWindowFocus><CourseApp {...props} /></SessionProvider>;
+  return (
+    <>
+      <Head><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" /></Head>
+      <SessionProvider session={props.pageProps.session} refetchInterval={60} refetchOnWindowFocus><CourseApp {...props} /></SessionProvider>
+    </>
+  );
 }
