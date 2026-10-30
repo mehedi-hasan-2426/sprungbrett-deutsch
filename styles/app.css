@@ -265,7 +265,7 @@ button, .button {
 button:not(:disabled):active, .button:active { transform: scale(0.97); }
 @media (hover: hover) and (pointer: fine) {
   button:hover, .button:hover { background: var(--action-hover); }
-  button.secondary:hover, .button.secondary:hover, .option:hover { background: var(--tint); border-color: var(--fg); }
+  button.secondary:hover, .button.secondary:hover, .option:hover { background: var(--tint); border-color: var(--muted); }
 }
 button.secondary, .button.secondary, .option { background: transparent; color: var(--fg); border-color: var(--line); }
 .option.selected, .option.selected:hover { background: var(--action); color: var(--action-fg); border-color: var(--action-line); }
@@ -423,11 +423,11 @@ summary { cursor: pointer; color: var(--accent); }
 .path-step:nth-child(8) { animation-delay: 280ms; } .path-step:nth-child(n+9) { animation-delay: 320ms; }
 @keyframes path-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 
-.signin-content > * { animation: rise-in 300ms var(--ease-out) both; }
+.signin-content > * { animation: rise-in 300ms var(--ease-out) backwards; }
 .signin-content > :nth-child(2) { animation-delay: 50ms; }
 .signin-content > :nth-child(3) { animation-delay: 100ms; }
 .signin-content > :nth-child(n+4) { animation-delay: 150ms; }
-.flashcard, .item .feedback { animation: rise-in 200ms var(--ease-out) both; }
+.flashcard, .item .feedback { animation: rise-in 200ms var(--ease-out) backwards; }
 .side-percent.started { animation: fade-in 200ms var(--ease-out); }
 .accent-heading::after { content: ""; display: block; width: 4rem; height: 3px; margin-top: 0.6rem; border-radius: 3px; background: var(--action-line); animation: line-reveal 600ms var(--ease-in-out) 150ms both; }
 .signin-content .accent-heading::after { margin: 0.9rem auto 0; animation-name: line-reveal-center; }
@@ -438,7 +438,7 @@ summary { cursor: pointer; color: var(--accent); }
 
 @media (prefers-reduced-motion: reduce) {
   .path-step, .accent-heading::after { animation: none; }
-  .signin-content > *, .flashcard, .item .feedback, .side-percent.started { animation: fade-in 150ms ease both; }
+  .signin-content > *, .flashcard, .item .feedback, .side-percent.started { animation: fade-in 150ms ease backwards; }
   .flip-face, .flip.is-flipped .flip-front { transform: none; }
   .flip.is-flipped .flip-front, .flip:not(.is-flipped) .flip-back { opacity: 0; }
   button:not(:disabled):active, .button:active { transform: none; }
