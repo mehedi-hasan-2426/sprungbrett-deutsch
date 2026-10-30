@@ -6,6 +6,7 @@ import { InlineText } from "../../src/components/Blocks.tsx";
 import { Recorder } from "../../src/components/Recorder.tsx";
 import { Rubric, SPEAKING_CRITERIA } from "../../src/components/Rubric.tsx";
 import { WritingTask } from "../../src/components/WritingTask.tsx";
+import { isExtraWriting } from "../../src/content/writing.ts";
 import { loadCourse, weekSummaries } from "../../src/server/load.ts";
 import type { WeekSummary } from "../../src/lib/weeks.ts";
 import { groupScore } from "../../src/lib/progress.ts";
@@ -137,7 +138,7 @@ export const getServerSideProps = protect<Props>(({ params }) => {
   const cp = course.checkpoints.find((c) => c.n === Number(params?.n));
   const week = cp ? weekSummaries(course)[cp.week - 1] : undefined;
   if (!cp || !week) return { notFound: true };
-  const tasks = cp.writing ? [cp.writing] : course.weeks[cp.week - 1]?.writing ?? [];
+  const tasks = cp.writing ? [cp.writing] : (course.weeks[cp.week - 1]?.writing ?? []).filter((t) => !isExtraWriting(t.id));
   return {
     props: { cp, week, tasks, speakingKey: cp.speaking ? `cp${cp.n}` : `w${cp.week}`, criteria: course.rubric.writing, checklist: course.rubric.checklist },
   };

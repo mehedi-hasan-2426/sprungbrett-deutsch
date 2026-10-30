@@ -54,7 +54,7 @@ test("reading and writing retain German exam instructions and stable IDs", () =>
   for (const original of [source.placement, ...source.weeks]) {
     const translated = [course.placement, ...course.weeks].find((u) => u.id === original.id);
     assert.ok(translated);
-    assert.deepEqual(translated.writing, original.writing);
+    assert.deepEqual(translated.writing.slice(0, original.writing.length), original.writing);
     for (const section of original.sections.filter((s) => s.role === "reading" || s.role === "writing")) {
       assert.deepEqual(translated.sections.find((s) => s.id === section.id)?.blocks.slice(0, section.blocks.length), section.blocks);
       for (const block of section.blocks) {
