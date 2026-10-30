@@ -307,7 +307,7 @@ blockquote { margin: 0.75rem 0; padding: 0.6rem 1rem; border-left: 3px solid var
 pre { overflow-x: auto; font-size: 0.85rem; background: var(--tint); padding: 0.75rem; border-radius: 6px; }
 ul.checks { list-style: none; padding-left: 0.25rem; }
 
-.player, .recorder, .writing, .rubric { margin: 0.75rem 0; }
+.recorder, .writing, .rubric { margin: 0.75rem 0; }
 .rubric { border: 1px solid var(--line); border-radius: 14px; padding: 0.25rem 0.75rem; }
 .rubric-row { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.5rem; border-bottom: 1px dashed var(--line); padding: 0.25rem 0; }
 .model { background: var(--neutral-bg); border-radius: 14px; padding: 0.6rem 1rem; }
