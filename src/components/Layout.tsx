@@ -6,17 +6,18 @@ import { useProgress } from "../state/ProgressContext.tsx";
 import { Sidebar } from "./Sidebar.tsx";
 import { signOut } from "next-auth/react";
 import { useState } from "react";
-import { AppearancePicker } from "./AppearancePicker.tsx";
+import { ThemeToggle } from "./ThemeToggle.tsx";
+import { Logo } from "./Logo.tsx";
 import { RoleIcon } from "./RoleIcon.tsx";
 import type { SyncStatus } from "../lib/progress-sync.ts";
 
 const NAV = [
-  { href: "/", label: "Today", icon: "today" },
-  { href: "/plan", label: "Topics", icon: "path" },
-  { href: "/karten", label: "Flashcards", icon: "cards" },
-  { href: "/artikel", label: "der/die/das", icon: "article" },
-  { href: "/material/grammatik", label: "Grammar", icon: "grammar" },
-  { href: "/fortschritt", label: "Progress", icon: "progress" },
+  { href: "/", label: "Today", short: "Today", icon: "today" },
+  { href: "/plan", label: "Topics", short: "Topics", icon: "path" },
+  { href: "/karten", label: "Flashcards", short: "Cards", icon: "cards" },
+  { href: "/artikel", label: "der/die/das", short: "Articles", icon: "article" },
+  { href: "/material/grammatik", label: "Grammar", short: "Grammar", icon: "grammar" },
+  { href: "/fortschritt", label: "Progress", short: "Progress", icon: "progress" },
 ];
 
 function SyncIndicator({ status, retry }: { status: SyncStatus; retry: () => void }) {
@@ -24,24 +25,24 @@ function SyncIndicator({ status, retry }: { status: SyncStatus; retry: () => voi
     return (
       <div className="sync-status is-warn" role="status">
         <RoleIcon role="cloud-alert" className="sync-icon" />
-        <span>Couldn&rsquo;t sync</span>
+        <span className="sync-label">Couldn&rsquo;t sync</span>
         <button type="button" className="sync-retry" onClick={retry}>Retry</button>
       </div>
     );
   }
   if (status === "conflict") {
     return (
-      <div className="sync-status is-warn" role="status">
+      <Link className="sync-status is-warn icon-only tip" data-tip="Resolve sync conflict" href="/fortschritt">
         <RoleIcon role="cloud-alert" className="sync-icon" />
-        <Link href="/fortschritt">Resolve sync conflict</Link>
-      </div>
+        <span className="sr-only">Resolve sync conflict</span>
+      </Link>
     );
   }
   const [icon, label] = status === "saved" ? ["cloud-check", "Saved to cloud"] : status === "loading" ? ["cloud", "Loading progress…"] : ["cloud-upload", "Saving…"];
   return (
-    <div className="sync-status" role="status">
+    <div className="sync-status icon-only tip" data-tip={label} role="status">
       <RoleIcon role={icon} className="sync-icon" />
-      <span>{label}</span>
+      <span className="sr-only">{label}</span>
     </div>
   );
 }
@@ -81,24 +82,24 @@ export function Layout({ children, title }: { children: ReactNode; title?: strin
         Skip to content
       </a>
       <header className="top">
-        <Link href="/" className="brand">
-          Sprungbrett <span className="brand-tag">Deutsch</span>
+        <Link href="/" className="brand" aria-label="Sprungbrett home">
+          <Logo />
         </Link>
         <nav aria-label="Main navigation">
           {NAV.map((n) => (
             <Link key={n.href} href={n.href} aria-current={pathname === n.href ? "page" : undefined}>
               <RoleIcon role={n.icon} className="nav-icon" />
-              {n.label}
+              <span className="nav-label">{n.label}</span>
+              <span className="nav-short">{n.short}</span>
             </Link>
           ))}
         </nav>
         <div className="account-actions">
-          <AppearancePicker />
-          {guest ? <div className="sync-status" role="status">Guest: this browser only</div> : <SyncIndicator status={syncStatus} retry={() => { syncNow().catch(() => undefined); }} />}
-          {guest ? <Link className="button secondary sign-out" href="/signin">Sign in</Link> : null}
-          <button type="button" className="sign-out" onClick={leave} disabled={leaving}>
+          <ThemeToggle />
+          {guest ? <span className="sync-status icon-only tip" data-tip="Guest: progress stays in this browser" role="status"><RoleIcon role="cloud" className="sync-icon" /><span className="sr-only">Guest: this browser only</span></span> : <SyncIndicator status={syncStatus} retry={() => { syncNow().catch(() => undefined); }} />}
+          {guest ? <Link className="button secondary sign-in-link" href="/signin">Sign in</Link> : null}
+          <button type="button" className="sign-out icon-only tip" data-tip={guest ? "Leave guest mode" : "Sign out"} aria-label={guest ? "Leave guest mode" : "Sign out"} onClick={leave} disabled={leaving}>
             <RoleIcon role="log-out" className="sync-icon" />
-            {leaving ? "Leaving..." : guest ? "Leave guest" : "Sign out"}
           </button>
         </div>
       </header>
