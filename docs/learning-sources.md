@@ -24,6 +24,15 @@ are included.
 - vhs-Lernportal's home page was accessible, but A2 course details could not be
   extracted reliably. It is not counted as a substantive reference.
 
+## Writing formats (30 October 2026)
+
+For the extra writing tasks, the table of contents and the opening words of the
+writing prompts in privately owned copies of *Netzwerk neu A2 Kursbuch* (Klett) and
+*Menschen A2.1 Kursbuch* (Hueber) were checked to see which text types A2 courses
+practise: forum posts, comments, blog posts, postcards, cards, advice and stories.
+Only these format names were used. No prompt, text, picture or solution from either
+book is reproduced; every task and model text in `src/content/writing.ts` is new.
+
 ## Content And Difficulty Contract
 
 Every weekly addition has ten vocabulary entries with English meanings, forms,
