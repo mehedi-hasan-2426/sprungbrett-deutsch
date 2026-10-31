@@ -37,7 +37,7 @@ function Prompt({ text, blanks, values, setValue, disabled, label }: { text: str
               autoCapitalize="off"
               spellCheck={false}
               maxLength={MAX_ANSWER_LENGTH}
-              size={Math.max(6, (values[index] ?? "").length + 2)}
+              size={12}
             />
           );
         }
