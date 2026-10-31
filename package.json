@@ -17,6 +17,7 @@
     "build": "next build --webpack",
     "postbuild": "node scripts/check-output.mjs",
     "lint": "eslint .",
+    "e2e": "playwright test",
     "typecheck": "npm run content && tsc --noEmit",
     "pretest": "npm run content",
     "test": "node --experimental-strip-types --no-warnings --test \"tests/**/*.test.ts\" \"tests/**/*.test.mjs\"",
@@ -33,6 +34,7 @@
   "devDependencies": {
     "@eslint/js": "10.0.1",
     "@next/eslint-plugin-next": "16.4.3",
+    "@playwright/test": "1.64.1",
     "@types/node": "26.6.5",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
