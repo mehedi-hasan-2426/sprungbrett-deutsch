@@ -7,6 +7,7 @@ import { authConfigured, authOptions } from "../src/server/auth.ts";
 import type { CourseSession } from "../src/server/auth.ts";
 import { canAccess } from "../src/lib/access.ts";
 import { Logo } from "../src/components/Logo.tsx";
+import { Particles } from "../src/components/Particles.tsx";
 
 export default function SignIn({ configured, denied }: { configured: boolean; denied: boolean }) {
   const [pending, setPending] = useState(false);
@@ -40,7 +41,10 @@ export default function SignIn({ configured, denied }: { configured: boolean; de
       <Head><title>Sign in · Sprungbrett</title><meta name="robots" content="noindex" /></Head>
       <div className="signin-content">
         <p className="signin-brand"><Logo /></p>
-        <h1 className="accent-heading">Deutsch lernen.<br />Schritt für Schritt.</h1>
+        <div className="signin-hero">
+          <Particles />
+          <h1 className="accent-heading">Deutsch lernen.<br />Schritt für Schritt.</h1>
+        </div>
         <p className="signin-intro">Sign in to save your progress, or start learning as a guest.</p>
         {!configured ? <p role="status">Google sign-in is unavailable. You can still continue as a guest.</p> : null}
         {denied ? <p role="alert">Sign-in failed or this account is not approved. Try an approved Google account or continue as a guest.</p> : null}

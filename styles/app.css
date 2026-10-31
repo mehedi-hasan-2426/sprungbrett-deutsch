@@ -1,4 +1,5 @@
 :root, :root[data-appearance="light"] {
+  --particles: 0.4;
   --bg: #f5f6f8;
   --card: #ffffff;
   --fg: #0d0f11;
@@ -32,6 +33,7 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
+    --particles: 1;
     --bg: #0d0f11;
     --card: #161a1f;
     --fg: #ffffff;
@@ -61,6 +63,7 @@
 }
 
 :root[data-appearance="dark"] {
+  --particles: 1;
   --bg: #0d0f11;
   --card: #161a1f;
   --fg: #ffffff;
@@ -135,6 +138,9 @@ main[id], section[id], h3[id] { scroll-margin-top: 5rem; }
 .signin-screen { display: grid; place-items: center; min-height: 100svh; max-width: none; margin: 0; padding: 2rem 1.25rem; background: linear-gradient(rgba(10, 12, 14, 0.3), rgba(10, 12, 14, 0.7)), url("/landing-bg.jpg") center 70% / cover no-repeat #0d0f11; }
 .signin-content { width: 100%; max-width: 440px; text-align: center; padding: 2rem 1.75rem; border: 1px solid var(--line); border-radius: var(--radius); background: color-mix(in srgb, var(--card) 94%, transparent); box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35); }
 .signin-brand { margin: 0 0 1.5rem; }
+.signin-hero { position: relative; }
+.signin-hero h1 { position: relative; z-index: 1; }
+.particles { position: absolute; left: -1rem; top: -3rem; width: calc(100% + 2rem); height: calc(100% + 5rem); pointer-events: none; color: rgb(96, 165, 250); opacity: var(--particles); }
 .signin-brand .logo-word { font-size: 1.6rem; }
 .signin-brand .logo-mark { width: 34px; height: 34px; }
 .signin-content h1 { margin: 0; font-size: clamp(2rem, 6vw + 0.75rem, 2.75rem); line-height: 1.15; letter-spacing: 0; }
