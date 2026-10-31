@@ -1,4 +1,4 @@
-import type { Section, Unit } from "../lib/types.ts";
+import type { Section, Unit, WritingTask as WritingTaskData } from "../lib/types.ts";
 import { Blocks } from "./Blocks.tsx";
 import { ItemView } from "./ItemView.tsx";
 import { ListeningSoon } from "./ListeningSoon.tsx";
@@ -57,9 +57,35 @@ export function SectionView({ unit, section, rubric, idPrefix }: { unit: Unit; s
           ) : null}
         </>
       ) : null}
-      {section.role === "writing"
-        ? unit.writing.map((task) => <WritingTask key={task.id} task={task} criteria={rubric.criteria} max={rubric.max} checklist={rubric.checklist} />)
-        : null}
+      {section.role === "writing" && unit.writing.length ? <WritingTasks tasks={unit.writing} rubric={rubric} /> : null}
     </>
+  );
+}
+
+function WritingTasks({ tasks, rubric }: { tasks: WritingTaskData[]; rubric: WritingRubric }) {
+  const { progress } = useProgress();
+  const [index, setIndex] = useState(0);
+  const current = tasks[Math.min(index, tasks.length - 1)];
+  if (!current) return null;
+  return (
+    <section className="writing-tasks" aria-label="Writing tasks">
+      <nav className="task-picker" aria-label="Choose a writing task">
+        {tasks.map((task, k) => {
+          const done = progress.writing[task.id]?.submitted === true;
+          return (
+            <button key={task.id} type="button" className={k === index ? "option selected" : "option"} aria-current={k === index ? "step" : undefined} onClick={() => setIndex(k)}>
+              {k + 1}{done ? " ✓" : ""}
+              <span className="sr-only">{done ? " (submitted)" : ""}</span>
+            </button>
+          );
+        })}
+      </nav>
+      <p className="muted">Task {index + 1} of {tasks.length}</p>
+      <WritingTask key={current.id} task={current} criteria={rubric.criteria} max={rubric.max} checklist={rubric.checklist} />
+      <div className="task-nav">
+        <button type="button" className="secondary" disabled={index === 0} onClick={() => setIndex(index - 1)}>Previous task</button>
+        <button type="button" className="secondary" disabled={index >= tasks.length - 1} onClick={() => setIndex(index + 1)}>Next task</button>
+      </div>
+    </section>
   );
 }

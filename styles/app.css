@@ -115,6 +115,9 @@ main[id], section[id], h3[id] { scroll-margin-top: 5rem; }
 .skip { position: absolute; left: -999px; }
 .skip:focus { left: 0.5rem; top: 0.5rem; background: var(--card); padding: 0.5rem; z-index: 10; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.task-picker { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 1rem 0 0.25rem; }
+.task-picker .option { min-width: 48px; margin: 0; }
+.task-nav { display: flex; justify-content: space-between; gap: 0.5rem; margin-top: 1rem; }
 
 .top { display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem; align-items: center; padding: 0.7rem 1.25rem; border-bottom: 1px solid var(--line); background: var(--bg); position: sticky; top: 0; z-index: 5; }
 .top nav { display: flex; flex-wrap: wrap; gap: 0.25rem 0.35rem; flex: 1; }
