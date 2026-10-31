@@ -65,6 +65,18 @@ test("rubric scores move with arrow keys", async ({ page }) => {
   await expect(group.getByRole("radio", { checked: true })).not.toHaveText("1");
 });
 
+test("writing shows one task at a time", async ({ page }) => {
+  await enterAsGuest(page);
+  const writing = (await sectionLinks(page)).find((l) => /writ|schreib/i.test(l.text + l.href));
+  expect(writing).toBeTruthy();
+  await page.goto(writing?.href ?? "/woche/1");
+  await expect(page.locator(".writing")).toHaveCount(1);
+  const first = await page.locator(".writing .task").textContent();
+  await page.getByRole("button", { name: "Next task" }).click();
+  await expect(page.locator(".writing .task")).not.toHaveText(first ?? "");
+  await expect(page.getByText(/^Task 2 of \d+$/)).toBeVisible();
+});
+
 test("flashcards page loads for guests", async ({ page }) => {
   await enterAsGuest(page);
   await page.goto("/karten");
